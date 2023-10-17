@@ -16,7 +16,7 @@ class PROJECTD_API UPDAbilitySystemComponent : public UAbilitySystemComponent
 public:
 
 	/** Sets the current tag relationship mapping, if null it will clear it out */
-	//void SetTagRelationshipMapping(ULyraAbilityTagRelationshipMapping* NewMapping);
+	//void SetTagRelationshipMapping(UPDAbilityTagRelationshipMapping* NewMapping);
 
 
 	void ClearAbilityInput();

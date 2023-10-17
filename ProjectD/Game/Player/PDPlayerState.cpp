@@ -59,7 +59,7 @@ void APDPlayerState::OnExperienceLoaded(const UPDExperienceDefinition* CurrentEx
 		}
 		else
 		{
-			//UE_LOG(LogTemp, Error, TEXT("ALyraPlayerState::OnExperienceLoaded(): Unable to find PawnData to initialize player state [%s]!"), *GetNameSafe(this));
+			//UE_LOG(LogTemp, Error, TEXT("APDPlayerState::OnExperienceLoaded(): Unable to find PawnData to initialize player state [%s]!"), *GetNameSafe(this));
 		}
 	}
 }
@@ -71,7 +71,7 @@ void APDPlayerState::SetPawnData(const UPDPawnData* InPawnData)
 
 	if (PawnData)
 	{
-		//UE_LOG(LogLyra, Error, TEXT("Trying to set PawnData [%s] on player state [%s] that already has valid PawnData [%s]."), *GetNameSafe(InPawnData), *GetNameSafe(this), *GetNameSafe(PawnData));
+		//UE_LOG(LogPD, Error, TEXT("Trying to set PawnData [%s] on player state [%s] that already has valid PawnData [%s]."), *GetNameSafe(InPawnData), *GetNameSafe(this), *GetNameSafe(PawnData));
 		return;
 	}
 

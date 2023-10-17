@@ -12,7 +12,7 @@ class UCanvas;
 class UPDCameraComponent;
 
 /**
- * ELyraCameraModeBlendFunction
+ * EPDCameraModeBlendFunction
  *
  *	Blend function used for transitioning between camera modes.
  */
@@ -36,7 +36,7 @@ enum class EPDCameraModeBlendFunction : uint8
 
 
 /**
- * FLyraCameraModeView
+ * FPDCameraModeView
  *
  *	View data produced by the camera mode that is used to blend camera modes.
  */
@@ -153,7 +153,7 @@ protected:
 
 
 /**
- * ULyraCameraModeStack
+ * UPDCameraModeStack
  *
  *	Stack used for blending camera modes.
  */

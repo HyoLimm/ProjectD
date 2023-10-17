@@ -46,7 +46,7 @@ void UPDHeroComponent::OnRegister()
 
 	if (!GetPawn<APawn>())
 	{
-		//UE_LOG(LogLyra, Error, TEXT("[UPDHeroComponent::OnRegister] This component has been added to a blueprint whose base class is not a Pawn. To use this component, it MUST be placed on a Pawn Blueprint."));
+		//UE_LOG(LogPD, Error, TEXT("[UPDHeroComponent::OnRegister] This component has been added to a blueprint whose base class is not a Pawn. To use this component, it MUST be placed on a Pawn Blueprint."));
 
 #if WITH_EDITOR
 		if (GIsEditor)
@@ -187,10 +187,10 @@ void UPDHeroComponent::HandleChangeInitState(UGameFrameworkComponentManager* Man
 
 			// The player state holds the persistent data for this player (state that persists across deaths and multiple pawns).
 			// The ability system component and attribute sets live on the player state.
-			//PawnExtComp->InitializeAbilitySystem(LyraPS->GetLyraAbilitySystemComponent(), LyraPS);
+			//PawnExtComp->InitializeAbilitySystem(PDPS->GetPDAbilitySystemComponent(), PDPS);
 		}
 
-		if (APDPlayerController* LyraPC = GetController<APDPlayerController>())
+		if (APDPlayerController* PDPC = GetController<APDPlayerController>())
 		{
 			if (Pawn->InputComponent != nullptr)
 			{

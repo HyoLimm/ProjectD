@@ -13,13 +13,13 @@
 class UAttributeSet;
 class UGameplayEffect;
 class UPDAbilitySystemComponent;
-//class ULyraAbilitySystemComponent;
-//class ULyraGameplayAbility;
+//class UPDAbilitySystemComponent;
+//class UPDGameplayAbility;
 class UObject;
 
 
 /**
- * FLyraAbilitySet_GameplayAbility
+ * FPDAbilitySet_GameplayAbility
  *
  *	Data used by the ability set to grant gameplay abilities.
  */
@@ -45,7 +45,7 @@ public:
 
 
 /**
- * FLyraAbilitySet_GameplayEffect
+ * FPDAbilitySet_GameplayEffect
  *
  *	Data used by the ability set to grant gameplay effects.
  */
@@ -66,7 +66,7 @@ public:
 };
 
 /**
- * FLyraAbilitySet_AttributeSet
+ * FPDAbilitySet_AttributeSet
  *
  *	Data used by the ability set to grant attribute sets.
  */
@@ -83,7 +83,7 @@ public:
 };
 
 /**
- * FLyraAbilitySet_GrantedHandles
+ * FPDAbilitySet_GrantedHandles
  *
  *	Data used to store handles to what has been granted by the ability set.
  */
@@ -98,7 +98,7 @@ public:
 	void AddGameplayEffectHandle(const FActiveGameplayEffectHandle& Handle);
 	void AddAttributeSet(UAttributeSet* Set);
 
-	void TakeFromAbilitySystem(UPDAbilitySystemComponent* LyraASC);
+	void TakeFromAbilitySystem(UPDAbilitySystemComponent* PDASC);
 
 protected:
 
@@ -117,7 +117,7 @@ protected:
 
 
 /**
- * ULyraAbilitySet
+ * UPDAbilitySet
  *
  *	Non-mutable data asset used to grant gameplay abilities and gameplay effects.
  */

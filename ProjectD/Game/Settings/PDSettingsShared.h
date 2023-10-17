@@ -54,13 +54,13 @@ enum class EPDGamepadSensitivity : uint8
 class UPDLocalPlayer;
 
 /**
- * ULyraSettingsShared - The "Shared" settings are stored as part of the USaveGame system, these settings are not machine
+ * UPDSettingsShared - The "Shared" settings are stored as part of the USaveGame system, these settings are not machine
  * specific like the local settings, and are safe to store in the cloud - and 'share' them.  Using the save game system
  * we can also store settings per player, so things like controller keybind preferences should go here, because if those
  * are stored in the local settings all users would get them.
  *
  * TODO NDarnell Future version rename this maybe to CloudSave?  Even though these arent necessarily in the cloud...
- *               maybe change Localsettings to LyraPlatformSettings, or DeviceSettings?  Make this one UserSettings?  TBD
+ *               maybe change Localsettings to PDPlatformSettings, or DeviceSettings?  Make this one UserSettings?  TBD
  *               
  * NOTE: I want to do Within=LocalPlayer, but SaveGames create the object in the transient package, instead
  * of getting to select the outer, maybe LoadGameFromMemory should have a variant, like LoadGameFromMemory_WithOuter, or maybe pass in

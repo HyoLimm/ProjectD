@@ -33,10 +33,10 @@ UPDAbilitySystemComponent* APDBaseCharacter::GetPDAbilitySystemComponent() const
 
 void APDBaseCharacter::OnAbilitySystemInitialized()
 {
-	UPDAbilitySystemComponent* LyraASC = GetPDAbilitySystemComponent();
-	check(LyraASC);
+	UPDAbilitySystemComponent* PDASC = GetPDAbilitySystemComponent();
+	check(PDASC);
 
-	HealthComponent->InitializeWithAbilitySystem(LyraASC);
+	HealthComponent->InitializeWithAbilitySystem(PDASC);
 
 	InitializeGameplayTags();
 }

@@ -4,9 +4,9 @@
 #include "GameFramework/Actor.h"
 
 DEFINE_LOG_CATEGORY(LogPD);
-//DEFINE_LOG_CATEGORY(PDLyraExperience);
-//DEFINE_LOG_CATEGORY(PDLyraAbilitySystem);
-//DEFINE_LOG_CATEGORY(PDLyraTeams);
+//DEFINE_LOG_CATEGORY(PDPDExperience);
+//DEFINE_LOG_CATEGORY(PDPDAbilitySystem);
+//DEFINE_LOG_CATEGORY(PDPDTeams);
 //
 //FString GetClientServerContextString(UObject* ContextObject)
 //{

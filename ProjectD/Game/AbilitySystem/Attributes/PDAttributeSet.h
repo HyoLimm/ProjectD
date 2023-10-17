@@ -39,5 +39,5 @@ public:
 
 	UWorld* GetWorld() const override;
 
-	UPDAbilitySystemComponent* GetLyraAbilitySystemComponent() const;
+	UPDAbilitySystemComponent* GetPDAbilitySystemComponent() const;
 };

@@ -18,7 +18,7 @@ UPDHealthComponent::UPDHealthComponent(const FObjectInitializer& ObjectInitializ
 
 	AbilitySystemComponent = nullptr;
 	HealthSet = nullptr;
-	//DeathState = ELyraDeathState::NotDead;
+	//DeathState = EPDDeathState::NotDead;
 }
 
 

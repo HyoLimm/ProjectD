@@ -12,7 +12,7 @@
 
 
 //////////////////////////////////////////////////////////////////////////
-// FLyraCameraModeView
+// FPDCameraModeView
 //////////////////////////////////////////////////////////////////////////
 FPDCameraModeView::FPDCameraModeView()
 	: Location(ForceInit)
@@ -219,12 +219,12 @@ void UPDCameraMode::DrawDebug(UCanvas* Canvas) const
 	FDisplayDebugManager& DisplayDebugManager = Canvas->DisplayDebugManager;
 
 	DisplayDebugManager.SetDrawColor(FColor::White);
-	DisplayDebugManager.DrawString(FString::Printf(TEXT("      LyraCameraMode: %s (%f)"), *GetName(), BlendWeight));
+	DisplayDebugManager.DrawString(FString::Printf(TEXT("      PDCameraMode: %s (%f)"), *GetName(), BlendWeight));
 }
 
 
 //////////////////////////////////////////////////////////////////////////
-// ULyraCameraModeStack
+// UPDCameraModeStack
 //////////////////////////////////////////////////////////////////////////
 UPDCameraModeStack::UPDCameraModeStack()
 {

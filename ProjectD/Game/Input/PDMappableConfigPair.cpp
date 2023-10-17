@@ -5,8 +5,8 @@
 #include "CommonUISettings.h"
 #include "ICommonUIModule.h"
 #include "PlayerMappableInputConfig.h"
-//#include "Settings/LyraSettingsLocal.h"
-//#include "System/LyraAssetManager.h"
+//#include "Settings/PDSettingsLocal.h"
+//#include "System/PDAssetManager.h"
 
 //#include UE_INLINE_GENERATED_CPP_BY_NAME(MappableConfigPair)
 
@@ -31,9 +31,9 @@ bool FMappableConfigPair::CanBeActivated() const
 
 bool FMappableConfigPair::RegisterPair(const FMappableConfigPair& Pair)
 {
-	//ULyraAssetManager& AssetManager = ULyraAssetManager::Get();
+	//UPDAssetManager& AssetManager = UPDAssetManager::Get();
 
-	//if (ULyraSettingsLocal* Settings = ULyraSettingsLocal::Get())
+	//if (UPDSettingsLocal* Settings = UPDSettingsLocal::Get())
 	//{
 	//	// Register the pair with the settings, but do not activate it yet
 	//	if (const UPlayerMappableInputConfig* LoadedConfig = AssetManager.GetAsset(Pair.Config))
@@ -48,9 +48,9 @@ bool FMappableConfigPair::RegisterPair(const FMappableConfigPair& Pair)
 
 void FMappableConfigPair::UnregisterPair(const FMappableConfigPair& Pair)
 {
-	//ULyraAssetManager& AssetManager = ULyraAssetManager::Get();
+	//UPDAssetManager& AssetManager = UPDAssetManager::Get();
 
-	//if (ULyraSettingsLocal* Settings = ULyraSettingsLocal::Get())
+	//if (UPDSettingsLocal* Settings = UPDSettingsLocal::Get())
 	//{
 	//	if (const UPlayerMappableInputConfig* LoadedConfig = AssetManager.GetAsset(Pair.Config))
 	//	{

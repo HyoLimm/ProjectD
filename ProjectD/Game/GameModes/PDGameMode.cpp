@@ -17,10 +17,8 @@
 APDGameMode::APDGameMode(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer)
 {
-	GameStateClass = APDGameState::StaticClass();
-	//GameSessionClass = ALyraGameSession::StaticClass();
-	PlayerControllerClass = APDPlayerController::StaticClass();
-	//ReplaySpectatorPlayerControllerClass = ALyraReplayPlayerController::StaticClass();
+	GameStateClass = APDGameState::StaticClass();	
+	PlayerControllerClass = APDPlayerController::StaticClass();	
 	PlayerStateClass = APDPlayerState::StaticClass();
 	DefaultPawnClass = APDBaseCharacter::StaticClass();
 }
@@ -61,7 +59,7 @@ bool APDGameMode::ShouldSpawnAtStartSpot(AController* Player)
 
 void APDGameMode::FinishRestartPlayer(AController* NewPlayer, const FRotator& StartRotation)
 {
-	//if (ULyraPlayerSpawningManagerComponent* PlayerSpawningComponent = GameState->FindComponentByClass<ULyraPlayerSpawningManagerComponent>())
+	//if (UPDPlayerSpawningManagerComponent* PlayerSpawningComponent = GameState->FindComponentByClass<UPDPlayerSpawningManagerComponent>())
 	//{
 	//	PlayerSpawningComponent->FinishRestartPlayer(NewPlayer, StartRotation);
 	//}

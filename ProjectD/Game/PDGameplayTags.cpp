@@ -52,8 +52,8 @@ namespace PDGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Movement_Mode_Swimming, "Movement.Mode.Swimming", "Default Character movement tag");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Movement_Mode_Flying, "Movement.Mode.Flying", "Default Character movement tag");
 
-	// When extending Lyra, you can create your own movement modes but you need to update GetCustomMovementModeTagMap()
-	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Movement_Mode_Custom, "Movement.Mode.Custom", "This is invalid and should be replaced with custom tags.  See LyraGameplayTags::CustomMovementModeTagMap.");
+	// When extending PD, you can create your own movement modes but you need to update GetCustomMovementModeTagMap()
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Movement_Mode_Custom, "Movement.Mode.Custom", "This is invalid and should be replaced with custom tags.  See PDGameplayTags::CustomMovementModeTagMap.");
 
 	// Unreal Movement Modes
 	const TMap<uint8, FGameplayTag> MovementModeTagMap =
@@ -86,7 +86,7 @@ namespace PDGameplayTags
 			{
 				if (TestTag.ToString().Contains(TagString))
 				{
-					//UE_LOG(LogLyra, Display, TEXT("Could not find exact match for tag [%s] but found partial match on tag [%s]."), *TagString, *TestTag.ToString());
+					//UE_LOG(LogPD, Display, TEXT("Could not find exact match for tag [%s] but found partial match on tag [%s]."), *TagString, *TestTag.ToString());
 					Tag = TestTag;
 					break;
 				}

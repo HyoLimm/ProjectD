@@ -47,7 +47,7 @@ void UPDInputComponent::RemoveInputMappings(const UPDInputConfig* InputConfig, U
 	APDPlayerCharacter* LocalPlayer = InputSubsystem->GetLocalPlayer<APDPlayerCharacter>();
 	check(LocalPlayer);
 
-	//if (UPDSettingsLocal* LocalSettings = ULyraSettingsLocal::Get())
+	//if (UPDSettingsLocal* LocalSettings = UPDSettingsLocal::Get())
 	//{
 	//	// Remove any registered input contexts
 	//	const TArray<FLoadedMappableConfigPair>& Configs = LocalSettings->GetAllRegisteredInputConfigs();

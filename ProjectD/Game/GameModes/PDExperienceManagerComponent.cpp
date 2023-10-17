@@ -12,14 +12,14 @@ namespace PDConsoleVariables
 	static FAutoConsoleVariableRef CVarExperienceLoadRandomDelayMin(
 		TEXT("pd.chaos.ExperienceDelayLoad.MinSecs"),
 		ExperienceLoadRandomDelayMin,
-		TEXT("This value (in seconds) will be added as a delay of load completion of the experience (along with the random value lyra.chaos.ExperienceDelayLoad.RandomSecs)"),
+		TEXT("This value (in seconds) will be added as a delay of load completion of the experience (along with the random value PD.chaos.ExperienceDelayLoad.RandomSecs)"),
 		ECVF_Default);
 
 	static float ExperienceLoadRandomDelayRange = 0.0f;
 	static FAutoConsoleVariableRef CVarExperienceLoadRandomDelayRange(
 		TEXT("pd.chaos.ExperienceDelayLoad.RandomSecs"),
 		ExperienceLoadRandomDelayRange,
-		TEXT("A random amount of time between 0 and this value (in seconds) will be added as a delay of load completion of the experience (along with the fixed value lyra.chaos.ExperienceDelayLoad.MinSecs)"),
+		TEXT("A random amount of time between 0 and this value (in seconds) will be added as a delay of load completion of the experience (along with the fixed value PD.chaos.ExperienceDelayLoad.MinSecs)"),
 		ECVF_Default);
 
 	float GetExperienceLoadDelayDuration()
@@ -76,7 +76,7 @@ void UPDExperienceManagerComponent::StartExperienceLoad()
 	TArray<FName> BundlesToLoad;
 	//BundlesToLoad.Add(FPDBundles::Equipped);
 
-	////@TODO: Centralize this client/server stuff into the LyraAssetManager
+	////@TODO: Centralize this client/server stuff into the PDAssetManager
 	//const ENetMode OwnerNetMode = GetOwner()->GetNetMode();
 	//const bool bLoadClient = GIsEditor || (OwnerNetMode != NM_DedicatedServer);
 	//const bool bLoadServer = GIsEditor || (OwnerNetMode != NM_Client);
@@ -199,7 +199,7 @@ void UPDExperienceManagerComponent::OnExperienceFullLoadCompleted()
 	//	};
 
 	//ActivateListOfActions(CurrentExperience->Actions);
-	//for (const TObjectPtr<ULyraExperienceActionSet>& ActionSet : CurrentExperience->ActionSets)
+	//for (const TObjectPtr<UPDExperienceActionSet>& ActionSet : CurrentExperience->ActionSets)
 	//{
 	//	if (ActionSet != nullptr)
 	//	{
@@ -220,7 +220,7 @@ void UPDExperienceManagerComponent::OnExperienceFullLoadCompleted()
 //
 //	// Apply any necessary scalability settings
 //#if !UE_SERVER
-//	ULyraSettingsLocal::Get()->OnExperienceLoaded();
+//	UPDSettingsLocal::Get()->OnExperienceLoaded();
 //#endif
 }
 

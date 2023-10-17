@@ -55,7 +55,7 @@ enum class EDeadzoneStick : uint8
 };
 
 /**
- * This is a deadzone input modifier that will have it's thresholds driven by what is in the Lyra Shared game settings.
+ * This is a deadzone input modifier that will have it's thresholds driven by what is in the PD Shared game settings.
  */
 UCLASS(NotBlueprintable, MinimalAPI, meta = (DisplayName = "PD Settings Driven Dead Zone"))
 class UPDInputModifierDeadZone : public UInputModifier
@@ -96,7 +96,7 @@ enum class EPDTargetingType : uint8
 	ADS = 1,
 };
 
-/** Applies a scalar modifier based on the current gamepad settings in Lyra Shared game settings.  */
+/** Applies a scalar modifier based on the current gamepad settings in PD Shared game settings.  */
 UCLASS(NotBlueprintable, MinimalAPI, meta = (DisplayName = "PD Gamepad Sensitivity"))
 class UPDInputModifierGamepadSensitivity : public UInputModifier
 {
@@ -115,7 +115,7 @@ protected:
 	//virtual FInputActionValue ModifyRaw_Implementation(const UEnhancedPlayerInput* PlayerInput, FInputActionValue CurrentValue, float DeltaTime) override;
 };
 
-/** Applies an inversion of axis values based on a setting in the Lyra Shared game settings */
+/** Applies an inversion of axis values based on a setting in the PD Shared game settings */
 UCLASS(NotBlueprintable, MinimalAPI, meta = (DisplayName = "PD Aim Inversion Setting"))
 class UPDInputModifierAimInversion : public UInputModifier
 {

@@ -8,7 +8,7 @@ namespace PDGameplayTags
 {
 	PROJECTD_API	FGameplayTag FindTagByString(const FString& TagString, bool bMatchPartialString = false);
 
-	// Declare all of the custom native tags that Lyra will use
+	// Declare all of the custom native tags that PD will use
 	//PROJECTD_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_ActivateFail_IsDead);
 	//PROJECTD_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_ActivateFail_Cooldown);
 	//PROJECTD_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_ActivateFail_Cost);

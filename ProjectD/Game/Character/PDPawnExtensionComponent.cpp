@@ -27,11 +27,11 @@ void UPDPawnExtensionComponent::OnRegister()
 	Super::OnRegister();
 
 	const APawn* Pawn = GetPawn<APawn>();
-	ensureAlwaysMsgf((Pawn != nullptr), TEXT("LyraPawnExtensionComponent on [%s] can only be added to Pawn actors."), *GetNameSafe(GetOwner()));
+	ensureAlwaysMsgf((Pawn != nullptr), TEXT("PDPawnExtensionComponent on [%s] can only be added to Pawn actors."), *GetNameSafe(GetOwner()));
 
 	TArray<UActorComponent*> PawnExtensionComponents;
 	Pawn->GetComponents(UPDPawnExtensionComponent::StaticClass(), PawnExtensionComponents);
-	ensureAlwaysMsgf((PawnExtensionComponents.Num() == 1), TEXT("Only one LyraPawnExtensionComponent should exist on [%s]."), *GetNameSafe(GetOwner()));
+	ensureAlwaysMsgf((PawnExtensionComponents.Num() == 1), TEXT("Only one PDPawnExtensionComponent should exist on [%s]."), *GetNameSafe(GetOwner()));
 
 	// Register with the init state system early, this will only work if this is a game world
 	// 초기 상태 시스템에 조기 등록하십시오. 이것은 게임 세계인 경우에만 작동합니다
