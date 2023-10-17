@@ -1,0 +1,23 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "Game/AbilitySystem/Attributes/PDAttributeSet.h"
+#include "Game/AbilitySystem//PDAbilitySystemComponent.h"
+
+UPDAttributeSet::UPDAttributeSet()
+{
+
+}
+
+UWorld* UPDAttributeSet::GetWorld() const
+{
+	const UObject* Outer = GetOuter();
+	check(Outer);
+
+	return Outer->GetWorld();
+}
+
+UPDAbilitySystemComponent* UPDAttributeSet::GetLyraAbilitySystemComponent() const
+{
+	return Cast<UPDAbilitySystemComponent>(GetOwningAbilitySystemComponent());
+}
