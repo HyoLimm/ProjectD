@@ -2,7 +2,7 @@
 
 
 #include "Game/AbilitySystem/Attributes/PDAttributeSet.h"
-#include "Game/AbilitySystem//PDAbilitySystemComponent.h"
+
 
 UPDAttributeSet::UPDAttributeSet()
 {
@@ -15,9 +15,4 @@ UWorld* UPDAttributeSet::GetWorld() const
 	check(Outer);
 
 	return Outer->GetWorld();
-}
-
-UPDAbilitySystemComponent* UPDAttributeSet::GetPDAbilitySystemComponent() const
-{
-	return Cast<UPDAbilitySystemComponent>(GetOwningAbilitySystemComponent());
 }

@@ -9,6 +9,7 @@ class UGameFeatureAction;
 
 /**
  * Definition of a set of actions to perform as part of entering an experience
+ * experience에 넣는 일부로 수행할 작업 집합의 정의
  */
 UCLASS(BlueprintType, NotBlueprintable)
 class UPDExperienceActionSet : public UPrimaryDataAsset
@@ -20,7 +21,8 @@ public:
 
 	//~UObject interface
 #if WITH_EDITOR
-	virtual EDataValidationResult IsDataValid(TArray<FText>& ValidationErrors) override;
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+
 #endif
 	//~End of UObject interface
 

@@ -3,7 +3,7 @@
 
 #include "Game/GameModes/PDGameState.h"
 #include "Game/GameModes/PDExperienceManagerComponent.h"
-#include "Game/AbilitySystem/PDAbilitySystemComponent.h"
+
 
 APDGameState::APDGameState(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -11,9 +11,7 @@ APDGameState::APDGameState(const FObjectInitializer& ObjectInitializer)
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
-	//AbilitySystemComponent = ObjectInitializer.CreateDefaultSubobject<UPDAbilitySystemComponent>(this, TEXT("AbilitySystemComponent"));
-	//AbilitySystemComponent->SetIsReplicated(true);
-	//AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
+
 
 	ExperienceManagerComponent = CreateDefaultSubobject<UPDExperienceManagerComponent>(TEXT("ExperienceManagerComponent"));
 }
@@ -41,9 +39,4 @@ void APDGameState::AddPlayerState(APlayerState* PlayerState)
 void APDGameState::RemovePlayerState(APlayerState* PlayerState)
 {
 	Super::RemovePlayerState(PlayerState);
-}
-
-UAbilitySystemComponent* APDGameState::GetAbilitySystemComponent() const
-{
-	return AbilitySystemComponent;
 }

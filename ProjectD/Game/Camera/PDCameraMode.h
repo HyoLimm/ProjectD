@@ -39,6 +39,7 @@ enum class EPDCameraModeBlendFunction : uint8
  * FPDCameraModeView
  *
  *	View data produced by the camera mode that is used to blend camera modes.
+ *  // PDCameraMode를 블렌드 하는 데 사용되는 카메라 모드에서 생성된 뷰 데이터.
  */
 struct FPDCameraModeView
 {
@@ -50,10 +51,10 @@ public:
 
 public:
 
-	FVector Location;
-	FRotator Rotation;
-	FRotator ControlRotation;
-	float _FieldOfView;
+	FVector  _Location;
+	FRotator _Rotation;
+	FRotator _ControlRotation;
+	float    _FieldOfView;
 };
 
 
@@ -121,11 +122,11 @@ protected:
 
 	// Minimum view pitch (in degrees).
 	UPROPERTY(EditDefaultsOnly, Category = "View", Meta = (UIMin = "-89.9", UIMax = "89.9", ClampMin = "-89.9", ClampMax = "89.9"))
-	float ViewPitchMin;
+	float _ViewPitchMin;
 
 	// Maximum view pitch (in degrees).
 	UPROPERTY(EditDefaultsOnly, Category = "View", Meta = (UIMin = "-89.9", UIMax = "89.9", ClampMin = "-89.9", ClampMax = "89.9"))
-	float ViewPitchMax;
+	float _ViewPitchMax;
 
 	// How long it takes to blend in this mode.
 	UPROPERTY(EditDefaultsOnly, Category = "Blending")
@@ -140,9 +141,11 @@ protected:
 	float BlendExponent;
 
 	// Linear blend alpha used to determine the blend weight.
+	// blend weight를 결정하는 데 사용되는 Linear blend alpha.
 	float BlendAlpha;
 
 	// Blend weight calculated using the blend alpha and function.
+	// blend alpha 그리고 함수를 사용하여 계산된 Blend weight
 	float BlendWeight;
 
 protected:
@@ -169,7 +172,7 @@ public:
 	void ActivateStack();
 	void DeactivateStack();
 
-	bool IsStackActivate() const { return bIsActive; }
+	bool IsStackActivate() const { return _bIsActive; }
 
 	void PushCameraMode(TSubclassOf<UPDCameraMode> CameraModeClass);
 
@@ -189,11 +192,11 @@ protected:
 
 protected:
 
-	bool bIsActive;
+	bool _bIsActive;
 
 	UPROPERTY()
-	TArray<TObjectPtr<UPDCameraMode>> CameraModeInstances;
+	TArray<TObjectPtr<UPDCameraMode>> _CameraModeInstances;
 
 	UPROPERTY()
-	TArray<TObjectPtr<UPDCameraMode>> CameraModeStack;
+	TArray<TObjectPtr<UPDCameraMode>> _CameraModeStack;
 };

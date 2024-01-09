@@ -28,8 +28,8 @@ public:
 	template<class UserClass, typename FuncType>
 	void BindNativeAction(const UPDInputConfig* InputConfig, const FGameplayTag& InputTag, ETriggerEvent TriggerEvent, UserClass* Object, FuncType Func, bool bLogIfNotFound);
 
-	/*template<class UserClass, typename PressedFuncType, typename ReleasedFuncType>
-	void BindAbilityActions(const UPDInputConfig* InputConfig, UserClass* Object, PressedFuncType PressedFunc, ReleasedFuncType ReleasedFunc, TArray<uint32>& BindHandles);*/
+	template<class UserClass, typename PressedFuncType, typename ReleasedFuncType>
+	void BindAbilityActions(const UPDInputConfig* InputConfig, UserClass* Object, PressedFuncType PressedFunc, ReleasedFuncType ReleasedFunc, TArray<uint32>& BindHandles);
 
 	void RemoveBinds(TArray<uint32>& BindHandles);
 };
@@ -42,4 +42,26 @@ void UPDInputComponent::BindNativeAction(const UPDInputConfig* InputConfig, cons
 	{
 		BindAction(IA, TriggerEvent, Object, Func);
 	}
+}
+
+template<class UserClass, typename PressedFuncType, typename ReleasedFuncType>
+void UPDInputComponent::BindAbilityActions(const UPDInputConfig* InputConfig, UserClass* Object, PressedFuncType PressedFunc, ReleasedFuncType ReleasedFunc, TArray<uint32>& BindHandles)
+{
+	check(InputConfig);
+
+	//for (const FPDInputAction& Action : InputConfig->AbilityInputActions)
+	//{
+	//	if (Action.InputAction && Action.InputTag.IsValid())
+	//	{
+	//		if (PressedFunc)
+	//		{
+	//			BindHandles.Add(BindAction(Action.InputAction, ETriggerEvent::Triggered, Object, PressedFunc, Action.InputTag).GetHandle());
+	//		}
+
+	//		if (ReleasedFunc)
+	//		{
+	//			BindHandles.Add(BindAction(Action.InputAction, ETriggerEvent::Completed, Object, ReleasedFunc, Action.InputTag).GetHandle());
+	//		}
+	//	}
+	//}
 }

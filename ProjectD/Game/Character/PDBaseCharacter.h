@@ -16,13 +16,10 @@ class PROJECTD_API APDBaseCharacter : public AModularCharacter
 {
 	GENERATED_BODY()
 
-public:
-	// Sets default values for this character's properties
+public:	
 	APDBaseCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-
-	UFUNCTION(BlueprintCallable, Category = "PD|Character")
-	UPDAbilitySystemComponent* GetPDAbilitySystemComponent() const;
+	bool		IsAlive();
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "PD|Character", Meta = (AllowPrivateAccess = "true"))

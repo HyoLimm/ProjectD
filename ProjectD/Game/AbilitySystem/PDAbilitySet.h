@@ -12,9 +12,8 @@
 
 class UAttributeSet;
 class UGameplayEffect;
-class UPDAbilitySystemComponent;
-//class UPDAbilitySystemComponent;
-//class UPDGameplayAbility;
+
+
 class UObject;
 
 
@@ -98,7 +97,7 @@ public:
 	void AddGameplayEffectHandle(const FActiveGameplayEffectHandle& Handle);
 	void AddAttributeSet(UAttributeSet* Set);
 
-	void TakeFromAbilitySystem(UPDAbilitySystemComponent* PDASC);
+	//void TakeFromAbilitySystem(UPDAbilitySystemComponent* PDASC);
 
 protected:
 
@@ -132,7 +131,7 @@ public:
 
 	// Grants the ability set to the specified ability system component.
 	// The returned handles can be used later to take away anything that was granted.
-	void GiveToAbilitySystem(UPDAbilitySystemComponent* PdASC, FPDAbilitySet_GrantedHandles* OutGrantedHandles, UObject* SourceObject = nullptr) const;
+	//void GiveToAbilitySystem(UPDAbilitySystemComponent* PdASC, FPDAbilitySet_GrantedHandles* OutGrantedHandles, UObject* SourceObject = nullptr) const;
 
 protected:
 

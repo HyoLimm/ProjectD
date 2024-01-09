@@ -6,7 +6,6 @@
 #include "ModularPlayerState.h"
 #include "PDPlayerState.generated.h"
 
-class UPDAbilitySystemComponent;
 class UPDExperienceDefinition;
 class UPDPawnData;
 
@@ -18,6 +17,10 @@ class PROJECTD_API APDPlayerState : public AModularPlayerState
 public:
 
 	APDPlayerState(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+
+
+
+
 
 
 	template <class T>
@@ -43,10 +46,5 @@ protected:
 	UPROPERTY()
 	TObjectPtr<const UPDPawnData> PawnData;
 
-private:
-
-	// The ability system component sub-object used by player characters.
-	UPROPERTY(VisibleAnywhere, Category = "PD|PlayerState")
-	TObjectPtr<UPDAbilitySystemComponent> AbilitySystemComponent;
 
 };

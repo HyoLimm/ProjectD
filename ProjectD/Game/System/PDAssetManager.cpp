@@ -4,6 +4,9 @@
 #include "Game/System/PDAssetManager.h"
 #include "Game/PDLogChannels.h"
 
+const FName FPDBundles::Equipped("Equipped");
+
+
 UPDAssetManager::UPDAssetManager()
 {
 	DefaultPawnData = nullptr;
@@ -40,7 +43,7 @@ UObject* UPDAssetManager::SynchronousLoadAsset(const FSoftObjectPath& AssetPath)
 			LogTimePtr = MakeUnique<FScopeLogTime>(*FString::Printf(TEXT("Synchronously loaded asset [%s]"), *AssetPath.ToString()), nullptr, FScopeLogTime::ScopeLog_Seconds);
 		}
 
-		if (UAssetManager::IsValid())
+		if (UAssetManager::IsInitialized())
 		{
 			return UAssetManager::GetStreamableManager().LoadSynchronous(AssetPath, false);
 		}

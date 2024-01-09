@@ -8,8 +8,8 @@
 #include "PDPlayerCharacter.generated.h"
 
 class UPDCameraComponent;
-class UPDPawnExtensionComponent;
-class UPDHealthComponent;
+class UPDPlayerLevelManagerComponent;
+class UPDPlayerCombatComponent;
 
 UCLASS()
 class PROJECTD_API APDPlayerCharacter : public APDBaseCharacter
@@ -22,23 +22,11 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "PD|Character", Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UPDCameraComponent> CameraComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "PD|Character", Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UPDPlayerLevelManagerComponent> ExperienceComponent;
 
-
-
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* MoveAction;
-
-	/** MappingContext */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputMappingContext* DefaultMappingContext;
-
-protected:
-	/** Called for movement input */
-	void Move(const FInputActionValue& Value);
-
-	/** Called for looking input */
-	void Look(const FInputActionValue& Value);
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "PD|Character", Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UPDPlayerCombatComponent>		CombatComponent;
 
 
 protected:
@@ -47,4 +35,8 @@ protected:
 
 	// To add mapping context
 	virtual void BeginPlay();
+
+protected:
+	virtual void OnAbilitySystemInitialized() override;
+	virtual void OnAbilitySystemUninitialized() override;
 };

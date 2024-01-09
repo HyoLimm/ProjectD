@@ -1,0 +1,31 @@
+// Copyright(c) Depsee. All Rights Reserved.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/HUD.h"
+#include "PDHUD.generated.h"
+
+
+UCLASS(Config = Game)
+class PROJECTD_API APDHUD : public AHUD
+{
+	GENERATED_BODY()
+public:
+	APDHUD(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+
+protected:
+
+	//~UObject interface
+	virtual void PreInitializeComponents() override;
+	//~End of UObject interface
+
+	//~AActor interface
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	//~End of AActor interface
+
+	//~AHUD interface
+	virtual void GetDebugActorList(TArray<AActor*>& InOutList) override;
+	//~End of AHUD interface
+};

@@ -9,7 +9,8 @@ public class ProjectD : ModuleRules
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
         PublicIncludePaths.AddRange(
             new string[] {
-                        "ProjectD"
+                        "ProjectD",
+                        "Game"
             }
         );
 
@@ -32,7 +33,8 @@ public class ProjectD : ModuleRules
                 "GameplayTags",
                 "GameplayTasks",
                 "GameplayAbilities",                
-                "GameFeatures",                
+                "GameFeatures",
+          
             }
         );
 
@@ -48,6 +50,7 @@ public class ProjectD : ModuleRules
                 "CommonInput",
                 "CommonGame",
                 "CommonUser",
+                "UIExtension",
             }
         );
 }

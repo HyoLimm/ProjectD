@@ -5,14 +5,15 @@
 #include "Game/Character/PDPawnData.h"
 #include "Game/Player/PDPlayerState.h"
 #include "Game/Player/PDPlayerSpawningManagerComponent.h"
+#include "Game/Player/PDPlayerController.h"
 #include "Game/PDLogChannels.h"
-#include "Game/Character/PDPawnExtensionComponent.h"
-#include "PDPlayerController.h"
+#include "Game/Character/Component/PDPawnExtensionComponent.h"
 #include "Game/Character/PDBaseCharacter.h"
 #include "Game/System/PDAssetManager.h"
 #include "PDExperienceManagerComponent.h"
 #include "PDExperienceDefinition.h"
 #include "PDGameState.h"
+#include "Game/GameModes/PDEnemyManagerComponent.h"
 
 APDGameMode::APDGameMode(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer)
@@ -21,6 +22,9 @@ APDGameMode::APDGameMode(const FObjectInitializer& ObjectInitializer /*= FObject
 	PlayerControllerClass = APDPlayerController::StaticClass();	
 	PlayerStateClass = APDPlayerState::StaticClass();
 	DefaultPawnClass = APDBaseCharacter::StaticClass();
+	HUDClass = APDHUD::StaticClass();
+
+	EnemyManagerComponent = CreateDefaultSubobject<UPDEnemyManagerComponent>(TEXT("EnemyManagerComponent"));
 }
 
 
@@ -134,7 +138,7 @@ UClass* APDGameMode::GetDefaultPawnClassForController_Implementation(AController
 	}
 
 	return Super::GetDefaultPawnClassForController_Implementation(InController);
-}
+} 
 
 bool APDGameMode::IsExperienceLoaded() const
 {
@@ -148,18 +152,16 @@ bool APDGameMode::IsExperienceLoaded() const
 void APDGameMode::HandleMatchAssignmentIfNotExpectingOne()
 {
 	FPrimaryAssetId ExperienceId;
-	FString ExperienceIdSource;
-
-	UWorld* World = GetWorld();
-
-	UPDAssetManager& AssetManager = UPDAssetManager::Get();
+	
 	FAssetData Dummy;
-	if (ExperienceId.IsValid() && !AssetManager.GetPrimaryAssetData(ExperienceId, /*out*/ Dummy))
+	if (ExperienceId.IsValid() && false == UPDAssetManager::Get().GetPrimaryAssetData(ExperienceId, /*out*/ Dummy))
 	{
 		UE_LOG(LogPD, Error, TEXT("EXPERIENCE: Wanted to use %s but couldn't find it, falling back to the default)"), *ExperienceId.ToString());
 		ExperienceId = FPrimaryAssetId();
 	}
 
+
+	FString ExperienceIdSource;
 	// Final fallback to the default experience
 	if (!ExperienceId.IsValid())
 	{

@@ -40,13 +40,13 @@ protected:
 	bool bUseRuntimeFloatCurves;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Third Person", Meta = (EditCondition = "bUseRuntimeFloatCurves"))
-	FRuntimeFloatCurve TargetOffsetX;
+	FRuntimeFloatCurve _TargetOffsetX;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Third Person", Meta = (EditCondition = "bUseRuntimeFloatCurves"))
-	FRuntimeFloatCurve TargetOffsetY;
+	FRuntimeFloatCurve _TargetOffsetY;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Third Person", Meta = (EditCondition = "bUseRuntimeFloatCurves"))
-	FRuntimeFloatCurve TargetOffsetZ;
+	FRuntimeFloatCurve _TargetOffsetZ;
 
 	// Alters the speed that a crouch offset is blended in or out
 	//크라우치 오프셋이 혼합되거나 혼합되는 속도를 변경합니다
@@ -90,19 +90,17 @@ public:
 	float AimLineToDesiredPosBlockedPct;
 
 	UPROPERTY(Transient)
-	TArray<TObjectPtr<const AActor>> DebugActorsHitDuringCameraPenetration;
+	TArray<TObjectPtr<const AActor>> _DebugActorsHitDuringCameraPenetration;
 
 #if ENABLE_DRAW_DEBUG
 	mutable float LastDrawDebugTime = -MAX_FLT;
 #endif
 
 protected:
-
-	void SetTargetCrouchOffset(FVector NewTargetOffset);
-	void UpdateCrouchOffset(float DeltaTime);
+	void SetTargetCrouchOffset(FVector NewTargetOffset);	
 
 	FVector InitialCrouchOffset = FVector::ZeroVector;
 	FVector TargetCrouchOffset = FVector::ZeroVector;
-	float CrouchOffsetBlendPct = 1.0f;
+	float CrouchOffsetBlendPct = 1.0f;	
 	FVector CurrentCrouchOffset = FVector::ZeroVector;
 };

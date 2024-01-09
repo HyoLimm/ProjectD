@@ -12,7 +12,7 @@ class UPDAbilitySystemComponent;
 class UAbilitySystemComponent;
 
 UCLASS(Config = Game)
-class PROJECTD_API APDGameState : public AModularGameStateBase, public IAbilitySystemInterface
+class PROJECTD_API APDGameState : public AModularGameStateBase
 {
 	GENERATED_BODY()
 public:
@@ -32,12 +32,10 @@ public:
 	virtual void RemovePlayerState(APlayerState* PlayerState) override;	
 	//~End of AGameStateBase interface
 
-	//~IAbilitySystemInterface
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-	//~End of IAbilitySystemInterface
+	////~IAbilitySystemInterface
+	//virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	////~End of IAbilitySystemInterface
 
-	UFUNCTION(BlueprintCallable, Category = "PD|GameState")
-	UPDAbilitySystemComponent* GetPDAbilitySystemComponent() const { return AbilitySystemComponent; }
 
 
 
@@ -45,9 +43,7 @@ private:
 	UPROPERTY()
 	TObjectPtr<UPDExperienceManagerComponent> ExperienceManagerComponent;
 
-	// The ability system component subobject for game-wide things (primarily gameplay cues)
-	UPROPERTY(VisibleAnywhere, Category = "PD|GameState")
-	TObjectPtr<UPDAbilitySystemComponent> AbilitySystemComponent;
+
 
 protected:
 

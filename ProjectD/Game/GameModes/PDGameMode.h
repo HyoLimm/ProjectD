@@ -8,6 +8,7 @@
 
 class UPDPawnData;
 class UPDExperienceDefinition;
+class UPDEnemyManagerComponent;
 
 
 UCLASS(Config = Game, Meta = (ShortTooltip = "The base game mode class used by this project."))
@@ -49,4 +50,10 @@ protected:
 
 
 	void OnExperienceLoaded(const UPDExperienceDefinition* CurrentExperience);
+
+
+
+private:
+	UPROPERTY()
+	TObjectPtr<UPDEnemyManagerComponent> EnemyManagerComponent;
 };

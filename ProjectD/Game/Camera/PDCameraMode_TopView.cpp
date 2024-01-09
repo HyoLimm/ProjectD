@@ -8,19 +8,14 @@ UPDCameraMode_TopView::UPDCameraMode_TopView()
 	
 }
 
-
 void  UPDCameraMode_TopView::UpdateView(float DeltaTime)
 {
 	FVector PivotLocation = GetPivotLocation();
-	FRotator PivotRotation = GetPivotRotation();
 
-	//const double CameraLoftDistance = BoundsSizeToDistance.GetRichCurveConst()->Eval(100.0);	
+	PivotLocation += _Offset;
 
-	//PivotLocation = GetPivotLocation() +CameraLoftDistance;
-	PivotLocation += Offset;
-
-	_CurrentView.Location = PivotLocation;
-	_CurrentView.Rotation = DefaultPivotRotation;
-	_CurrentView.ControlRotation = _CurrentView.Rotation;
+	_CurrentView._Location = PivotLocation;
+	_CurrentView._Rotation = _DefaultPivotRotation;
+	_CurrentView._ControlRotation = _CurrentView._Rotation;
 	_CurrentView._FieldOfView = _FieldOfView;
 }

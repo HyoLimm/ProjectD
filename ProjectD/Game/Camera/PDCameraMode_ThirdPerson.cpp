@@ -13,9 +13,6 @@ namespace PDCameraMode_ThirdPerson_Statics
 	static const FName NAME_IgnoreCameraCollision = TEXT("IgnoreCameraCollision");
 }
 
-
-
-
 UPDCameraMode_ThirdPerson::UPDCameraMode_ThirdPerson()
 {
 	TargetOffsetCurve = nullptr;
@@ -31,38 +28,36 @@ UPDCameraMode_ThirdPerson::UPDCameraMode_ThirdPerson()
 
 void UPDCameraMode_ThirdPerson::UpdateView(float DeltaTime)
 {
-	//UpdateForTarget(DeltaTime);
-	//UpdateCrouchOffset(DeltaTime);
-
-	FVector PivotLocation = GetPivotLocation()/* + CurrentCrouchOffset*/;
+	FVector PivotLocation = GetPivotLocation() /* + OffsetBlendPct*/;
 	FRotator PivotRotation = GetPivotRotation();
 
-	PivotRotation.Pitch = FMath::ClampAngle(PivotRotation.Pitch, ViewPitchMin, ViewPitchMax);
+	PivotRotation.Pitch = FMath::ClampAngle(PivotRotation.Pitch, _ViewPitchMin, _ViewPitchMax);
 
-	_CurrentView.Location = PivotLocation;
-	_CurrentView.Rotation = PivotRotation;
-	_CurrentView.ControlRotation = _CurrentView.Rotation;
+	_CurrentView._Location = PivotLocation;
+	_CurrentView._Rotation = PivotRotation;
+	_CurrentView._ControlRotation = _CurrentView._Rotation;
 	_CurrentView._FieldOfView = _FieldOfView;
-
-	// Apply third person offset using pitch.
+	
 	//피치를 사용하여 3인칭 오프셋을 적용합니다.
 	if (!bUseRuntimeFloatCurves)
 	{
 		if (TargetOffsetCurve)
 		{
 			const FVector TargetOffset = TargetOffsetCurve->GetVectorValue(PivotRotation.Pitch);
-			_CurrentView.Location = PivotLocation + PivotRotation.RotateVector(TargetOffset);
+			_CurrentView._Location = PivotLocation + PivotRotation.RotateVector(TargetOffset);
 		}
 	}
 	else
 	{
 		FVector TargetOffset(0.0f);
 
-		TargetOffset.X = TargetOffsetX.GetRichCurveConst()->Eval(PivotRotation.Pitch);
-		TargetOffset.Y = TargetOffsetY.GetRichCurveConst()->Eval(PivotRotation.Pitch);
-		TargetOffset.Z = TargetOffsetZ.GetRichCurveConst()->Eval(PivotRotation.Pitch);
+		//에디터에서 적용되어있는 값 불러오기
+		TargetOffset.X = _TargetOffsetX.GetRichCurveConst()->Eval(PivotRotation.Pitch);
+		TargetOffset.Y = _TargetOffsetY.GetRichCurveConst()->Eval(PivotRotation.Pitch);
+		TargetOffset.Z = _TargetOffsetZ.GetRichCurveConst()->Eval(PivotRotation.Pitch);
 
-		_CurrentView.Location = PivotLocation + PivotRotation.RotateVector(TargetOffset);
+		// 적용값 view 적용
+		_CurrentView._Location = PivotLocation + PivotRotation.RotateVector(TargetOffset);
 	}
 	
 	// 벽 등 장애물에 뚫림을 방지하기 위해 최종적으로 카메라 위치 조정
@@ -95,8 +90,7 @@ void UPDCameraMode_ThirdPerson::UpdatePreventPenetration(float DeltaTime)
 	}
 
 	AActor* TargetActor = GetTargetActor();
-	APawn* TargetPawn = Cast<APawn>(TargetActor);
-	AController* TargetController = TargetPawn ? TargetPawn->GetController() : nullptr;
+	APawn* TargetPawn = Cast<APawn>(TargetActor);	
 	
 	if (const UPrimitiveComponent* PPActorRootComponent = Cast<UPrimitiveComponent>(TargetActor->GetRootComponent()))
 	{
@@ -105,7 +99,7 @@ void UPDCameraMode_ThirdPerson::UpdatePreventPenetration(float DeltaTime)
 		// Pick closest point on capsule to our aim line.
 		FVector ClosestPointOnLineToCapsuleCenter;
 		FVector SafeLocation = TargetActor->GetActorLocation();
-		FMath::PointDistToLine(SafeLocation, _CurrentView.Rotation.Vector(), _CurrentView.Location, ClosestPointOnLineToCapsuleCenter);
+		FMath::PointDistToLine(SafeLocation, _CurrentView._Rotation.Vector(), _CurrentView._Location, ClosestPointOnLineToCapsuleCenter);
 
 		// Adjust Safe distance height to be same as aim line, but within capsule.
 		// 안전 거리 높이를 조준선과 동일하지만 캡슐 내로 조정합니다.
@@ -123,7 +117,7 @@ void UPDCameraMode_ThirdPerson::UpdatePreventPenetration(float DeltaTime)
 
 		// 그런 다음 원하는 카메라 위치로 조준합니다
 		bool const bSingleRayPenetrationCheck = !bDoPredictiveAvoidance;
-		PreventCameraPenetration(*TargetActor, SafeLocation, _CurrentView.Location, DeltaTime, AimLineToDesiredPosBlockedPct, bSingleRayPenetrationCheck);
+		PreventCameraPenetration(*TargetActor, SafeLocation, _CurrentView._Location, DeltaTime, AimLineToDesiredPosBlockedPct, bSingleRayPenetrationCheck);
 
 	}
 }
@@ -131,7 +125,7 @@ void UPDCameraMode_ThirdPerson::UpdatePreventPenetration(float DeltaTime)
 void UPDCameraMode_ThirdPerson::PreventCameraPenetration(class AActor const& ViewTarget, FVector const& SafeLoc, FVector& CameraLoc, float const& DeltaTime, float& DistBlockedPct, bool bSingleRayOnly)
 {
 #if ENABLE_DRAW_DEBUG
-	DebugActorsHitDuringCameraPenetration.Reset();
+	_DebugActorsHitDuringCameraPenetration.Reset();
 #endif
 
 	float HardBlockedPct = DistBlockedPct;
@@ -217,7 +211,7 @@ void UPDCameraMode_ThirdPerson::PreventCameraPenetration(class AActor const& Vie
 					else
 					{
 #if ENABLE_DRAW_DEBUG
-						DebugActorsHitDuringCameraPenetration.AddUnique(TObjectPtr<const AActor>(HitActor));
+						_DebugActorsHitDuringCameraPenetration.AddUnique(TObjectPtr<const AActor>(HitActor));
 #endif
 					}
 				}
@@ -236,7 +230,7 @@ void UPDCameraMode_ThirdPerson::PreventCameraPenetration(class AActor const& Vie
 					Feeler.FramesUntilNextTrace = 0;
 
 #if ENABLE_DRAW_DEBUG
-					DebugActorsHitDuringCameraPenetration.AddUnique(TObjectPtr<const AActor>(HitActor));
+					_DebugActorsHitDuringCameraPenetration.AddUnique(TObjectPtr<const AActor>(HitActor));
 #endif
 				}
 			}
@@ -307,12 +301,12 @@ void UPDCameraMode_ThirdPerson::DrawDebug(UCanvas* Canvas) const
 
 #if ENABLE_DRAW_DEBUG
 	FDisplayDebugManager& DisplayDebugManager = Canvas->DisplayDebugManager;
-	for (int i = 0; i < DebugActorsHitDuringCameraPenetration.Num(); i++)
+	for (int i = 0; i < _DebugActorsHitDuringCameraPenetration.Num(); i++)
 	{
 		DisplayDebugManager.DrawString(
 			FString::Printf(TEXT("HitActorDuringPenetration[%d]: %s")
 				, i
-				, *DebugActorsHitDuringCameraPenetration[i]->GetName()));
+				, *_DebugActorsHitDuringCameraPenetration[i]->GetName()));
 	}
 
 	LastDrawDebugTime = GetWorld()->GetTimeSeconds();
@@ -326,16 +320,3 @@ void UPDCameraMode_ThirdPerson::SetTargetCrouchOffset(FVector NewTargetOffset)
 	TargetCrouchOffset = NewTargetOffset;
 }
 
-void UPDCameraMode_ThirdPerson::UpdateCrouchOffset(float DeltaTime)
-{
-	if (CrouchOffsetBlendPct < 1.0f)
-	{
-		CrouchOffsetBlendPct = FMath::Min(CrouchOffsetBlendPct + DeltaTime * CrouchOffsetBlendMultiplier, 1.0f);
-		CurrentCrouchOffset = FMath::InterpEaseInOut(InitialCrouchOffset, TargetCrouchOffset, CrouchOffsetBlendPct, 1.0f);
-	}
-	else
-	{
-		CurrentCrouchOffset = TargetCrouchOffset;
-		CrouchOffsetBlendPct = 1.0f;
-	}
-}

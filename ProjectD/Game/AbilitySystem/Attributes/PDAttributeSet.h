@@ -39,5 +39,4 @@ public:
 
 	UWorld* GetWorld() const override;
 
-	UPDAbilitySystemComponent* GetPDAbilitySystemComponent() const;
 };

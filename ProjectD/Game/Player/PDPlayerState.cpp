@@ -4,7 +4,7 @@
 #include "Game/Player/PDPlayerState.h"
 #include "Game/GameModes/PDExperienceManagerComponent.h"
 #include "Game/GameModes/PDGameMode.h"
-#include "Game/AbilitySystem/PDAbilitySystemComponent.h"
+
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
 #include "Components/GameFrameworkComponentManager.h"
@@ -15,9 +15,7 @@ const FName APDPlayerState::NAME_PDAbilityReady("PDAbilitiesReady");
 
 APDPlayerState::APDPlayerState(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer)
-{
-	
-	AbilitySystemComponent = ObjectInitializer.CreateDefaultSubobject<UPDAbilitySystemComponent>(this, TEXT("AbilitySystemComponent"));
+{	
 }
 
 
@@ -32,10 +30,6 @@ void APDPlayerState::PreInitializeComponents()
 void APDPlayerState::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-
-
-	check(AbilitySystemComponent);
-	AbilitySystemComponent->InitAbilityActorInfo(this, GetPawn());
 
 	UWorld* World = GetWorld();
 	if (World && World->IsGameWorld())
@@ -78,13 +72,6 @@ void APDPlayerState::SetPawnData(const UPDPawnData* InPawnData)
 	//MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, PawnData, this);
 	PawnData = InPawnData;
 
-	//for (const UPDAbilitySet* AbilitySet : InPawnData->AbilitySets)
-	//{
-	//	if (AbilitySet)
-	//	{
-	//		AbilitySet->GiveToAbilitySystem(AbilitySystemComponent, nullptr);
-	//	}
-	//}
 
 	UGameFrameworkComponentManager::SendGameFrameworkComponentExtensionEvent(this, NAME_PDAbilityReady);
 }

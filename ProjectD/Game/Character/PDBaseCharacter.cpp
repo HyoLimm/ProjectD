@@ -1,15 +1,15 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "PDBaseCharacter.h"
+#include "Game/Character/PDBaseCharacter.h"
 
-#include "PDCharacterMovementComponent.h"
-#include "PDPawnExtensionComponent.h"
-#include "PDHealthComponent.h"
+#include "Game/Character/Component/PDCharacterMovementComponent.h"
+#include "Game/Character/Component/PDPawnExtensionComponent.h"
+#include "Game/Character/Component/PDHealthComponent.h"
 #include <Components/CapsuleComponent.h>
 #include "Game/PDGameplayTags.h"
-#include "Game/AbilitySystem/PDAbilitySystemComponent.h"
-#include "Game/AbilitySystem/PDAbilitySystemComponent.h"
+
+
 
 APDBaseCharacter::APDBaseCharacter(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UPDCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
@@ -26,18 +26,19 @@ APDBaseCharacter::APDBaseCharacter(const FObjectInitializer& ObjectInitializer /
 	HealthComponent = CreateDefaultSubobject<UPDHealthComponent>(TEXT("HealthComponent"));
 }
 
-UPDAbilitySystemComponent* APDBaseCharacter::GetPDAbilitySystemComponent() const
+bool APDBaseCharacter::IsAlive()
 {
-	return PawnExtComponent->GetPDAbilitySystemComponent();
+	if (HealthComponent)
+	{
+		return HealthComponent->IsAlive();
+	}
+
+	check(false);
+	return false;
 }
 
 void APDBaseCharacter::OnAbilitySystemInitialized()
 {
-	UPDAbilitySystemComponent* PDASC = GetPDAbilitySystemComponent();
-	check(PDASC);
-
-	HealthComponent->InitializeWithAbilitySystem(PDASC);
-
 	InitializeGameplayTags();
 }
 
@@ -87,49 +88,12 @@ void APDBaseCharacter::FellOutOfWorld(const class UDamageType& dmgType)
 
 void APDBaseCharacter::InitializeGameplayTags()
 {
-	// Clear tags that may be lingering on the ability system from the previous pawn.
-	if (UPDAbilitySystemComponent* ASC = GetPDAbilitySystemComponent())
-	{
-		for (const TPair<uint8, FGameplayTag>& TagMapping : PDGameplayTags::MovementModeTagMap)
-		{
-			if (TagMapping.Value.IsValid())
-			{
-				ASC->SetLooseGameplayTagCount(TagMapping.Value, 0);
-			}
-		}
 
-		for (const TPair<uint8, FGameplayTag>& TagMapping : PDGameplayTags::CustomMovementModeTagMap)
-		{
-			if (TagMapping.Value.IsValid())
-			{
-				ASC->SetLooseGameplayTagCount(TagMapping.Value, 0);
-			}
-		}
-
-		UPDCharacterMovementComponent* PDMoveComp = CastChecked<UPDCharacterMovementComponent>(GetCharacterMovement());
-		SetMovementModeTag(PDMoveComp->MovementMode, PDMoveComp->CustomMovementMode, true);
-	}
 }
 
 void APDBaseCharacter::SetMovementModeTag(EMovementMode MovementMode, uint8 CustomMovementMode, bool bTagEnabled)
 {
-	if (UPDAbilitySystemComponent* ASC = GetPDAbilitySystemComponent())
-	{
-		const FGameplayTag* MovementModeTag = nullptr;
-		if (MovementMode == MOVE_Custom)
-		{
-			MovementModeTag = PDGameplayTags::CustomMovementModeTagMap.Find(CustomMovementMode);
-		}
-		else
-		{
-			MovementModeTag = PDGameplayTags::MovementModeTagMap.Find(MovementMode);
-		}
 
-		if (MovementModeTag && MovementModeTag->IsValid())
-		{
-			ASC->SetLooseGameplayTagCount(*MovementModeTag, (bTagEnabled ? 1 : 0));
-		}
-	}
 }
 
 // Called every frame

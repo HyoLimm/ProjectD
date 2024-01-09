@@ -7,12 +7,14 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Components/InputComponent.h"
-#include "PDCharacterMovementComponent.h"
-#include "PDCameraComponent.h"
+
+#include "Game/Character/Component/PDCharacterMovementComponent.h"
+#include "Game/Character/Component/PDCameraComponent.h"
+#include "Game/Character/Component/PDPawnExtensionComponent.h"
+#include "Game/Combat/Component/PDPlayerCombatComponent.h"
 
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "PDPawnExtensionComponent.h"
 
 
 static FName NAME_PDCharacterCollisionProfile_Capsule(TEXT("PDPawnCapsule"));
@@ -38,39 +40,12 @@ APDPlayerCharacter::APDPlayerCharacter(const FObjectInitializer& ObjectInitializ
 
 
 
-	CameraComponent = CreateDefaultSubobject<UPDCameraComponent>(TEXT("CameraComponent"));
+	CameraComponent = CreateDefaultSubobject<UPDCameraComponent>(TEXT("PDCameraComponent"));
 	CameraComponent->SetRelativeLocation(FVector(-300.0f, 0.0f, 75.0f));
-}
 
-void APDPlayerCharacter::Move(const FInputActionValue& Value)
-{
+	ExperienceComponent = CreateDefaultSubobject<UPDPlayerLevelManagerComponent>(TEXT("PDPlayerLevelManagerComponent"));
 
-	if (Controller != nullptr)
-	{
-		// input is a Vector2D
-		const FVector2D MovementVector = Value.Get<FVector2D>();
-
-		// find out which way is forward
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-
-		// get forward vector
-		//const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		const FVector ForwardDirection =FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		
-
-		// get right vector 
-		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-		// add movement 
-		AddMovementInput(ForwardDirection, MovementVector.Y);
-		AddMovementInput(RightDirection, MovementVector.X);
-	}
-}
-
-void APDPlayerCharacter::Look(const FInputActionValue& Value)
-{
-
+	CombatComponent = CreateDefaultSubobject<UPDPlayerCombatComponent>(TEXT("PDPlayerCombatComponent"));
 }
 
 
@@ -86,12 +61,14 @@ void APDPlayerCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 
-	//Add Input Mapping Context
-	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-		{
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
-		}
-	}
+}
+
+void APDPlayerCharacter::OnAbilitySystemInitialized()
+{
+	Super::OnAbilitySystemInitialized();
+}
+
+void APDPlayerCharacter::OnAbilitySystemUninitialized()
+{
+	Super::OnAbilitySystemUninitialized();
 }

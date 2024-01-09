@@ -5,7 +5,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Engine/Canvas.h"
 #include "GameFramework/Character.h"
-#include "Game/Character/PDCameraComponent.h"
+#include "Game/Character/Component/PDCameraComponent.h"
 #include "PDPlayerCamManager.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(PDCameraMode)
@@ -15,9 +15,9 @@
 // FPDCameraModeView
 //////////////////////////////////////////////////////////////////////////
 FPDCameraModeView::FPDCameraModeView()
-	: Location(ForceInit)
-	, Rotation(ForceInit)
-	, ControlRotation(ForceInit)
+	: _Location(ForceInit)
+	, _Rotation(ForceInit)
+	, _ControlRotation(ForceInit)
 	, _FieldOfView(PD_CAMERA_DEFAULT_FOV)
 {
 }
@@ -34,13 +34,13 @@ void FPDCameraModeView::Blend(const FPDCameraModeView& Other, float OtherWeight)
 		return;
 	}
 
-	Location = FMath::Lerp(Location, Other.Location, OtherWeight);
+	_Location = FMath::Lerp(_Location, Other._Location, OtherWeight);
 
-	const FRotator DeltaRotation = (Other.Rotation - Rotation).GetNormalized();
-	Rotation = Rotation + (OtherWeight * DeltaRotation);
+	const FRotator DeltaRotation = (Other._Rotation - _Rotation).GetNormalized();
+	_Rotation = _Rotation + (OtherWeight * DeltaRotation);
 
-	const FRotator DeltaControlRotation = (Other.ControlRotation - ControlRotation).GetNormalized();
-	ControlRotation = ControlRotation + (OtherWeight * DeltaControlRotation);
+	const FRotator DeltaControlRotation = (Other._ControlRotation - _ControlRotation).GetNormalized();
+	_ControlRotation = _ControlRotation + (OtherWeight * DeltaControlRotation);
 
 	_FieldOfView = FMath::Lerp(_FieldOfView, Other._FieldOfView, OtherWeight);
 }
@@ -52,8 +52,8 @@ void FPDCameraModeView::Blend(const FPDCameraModeView& Other, float OtherWeight)
 UPDCameraMode::UPDCameraMode()
 {
 	_FieldOfView = PD_CAMERA_DEFAULT_FOV;
-	ViewPitchMin = PD_CAMERA_DEFAULT_PITCH_MIN;
-	ViewPitchMax = PD_CAMERA_DEFAULT_PITCH_MAX;
+	_ViewPitchMin = PD_CAMERA_DEFAULT_PITCH_MIN;
+	_ViewPitchMax = PD_CAMERA_DEFAULT_PITCH_MAX;
 
 	BlendTime = 0.5f;
 	BlendFunction = EPDCameraModeBlendFunction::EaseOut;
@@ -135,11 +135,11 @@ void UPDCameraMode::UpdateView(float DeltaTime)
 	FVector PivotLocation = GetPivotLocation();
 	FRotator PivotRotation = GetPivotRotation();
 
-	PivotRotation.Pitch = FMath::ClampAngle(PivotRotation.Pitch, ViewPitchMin, ViewPitchMax);
+	PivotRotation.Pitch = FMath::ClampAngle(PivotRotation.Pitch, _ViewPitchMin, _ViewPitchMax);
 
-	_CurrentView.Location = PivotLocation;
-	_CurrentView.Rotation = PivotRotation;
-	_CurrentView.ControlRotation = _CurrentView.Rotation;
+	_CurrentView._Location = PivotLocation;
+	_CurrentView._Rotation = PivotRotation;
+	_CurrentView._ControlRotation = _CurrentView._Rotation;
 	_CurrentView._FieldOfView = _FieldOfView;
 }
 
@@ -228,17 +228,17 @@ void UPDCameraMode::DrawDebug(UCanvas* Canvas) const
 //////////////////////////////////////////////////////////////////////////
 UPDCameraModeStack::UPDCameraModeStack()
 {
-	bIsActive = true;
+	_bIsActive = true;
 }
 
 void UPDCameraModeStack::ActivateStack()
 {
-	if (!bIsActive)
+	if (!_bIsActive)
 	{
-		bIsActive = true;
+		_bIsActive = true;
 
 		// Notify camera modes that they are being activated.
-		for (UPDCameraMode* CameraMode : CameraModeStack)
+		for (UPDCameraMode* CameraMode : _CameraModeStack)
 		{
 			check(CameraMode);
 			CameraMode->OnActivation();
@@ -248,12 +248,12 @@ void UPDCameraModeStack::ActivateStack()
 
 void UPDCameraModeStack::DeactivateStack()
 {
-	if (bIsActive)
+	if (_bIsActive)
 	{
-		bIsActive = false;
+		_bIsActive = false;
 
 		// Notify camera modes that they are being deactivated.
-		for (UPDCameraMode* CameraMode : CameraModeStack)
+		for (UPDCameraMode* CameraMode : _CameraModeStack)
 		{
 			check(CameraMode);
 			CameraMode->OnDeactivation();
@@ -263,73 +263,79 @@ void UPDCameraModeStack::DeactivateStack()
 
 void UPDCameraModeStack::PushCameraMode(TSubclassOf<UPDCameraMode> CameraModeClass)
 {
+	//PDCameraComponent에서 대부분 호출됌
 	if (!CameraModeClass)
 	{
 		return;
 	}
 
-	UPDCameraMode* CameraMode = GetCameraModeInstance(CameraModeClass);
-	check(CameraMode);
-
-	int32 StackSize = CameraModeStack.Num();
-
-	if ((StackSize > 0) && (CameraModeStack[0] == CameraMode))
+	if (UPDCameraMode* CameraMode = GetCameraModeInstance(CameraModeClass))
 	{
-		// Already top of stack.
-		return;
-	}
+		int32 StackSize = _CameraModeStack.Num();
 
-	// See if it's already in the stack and remove it.
-	// Figure out how much it was contributing to the stack.
-	int32 ExistingStackIndex = INDEX_NONE;
-	float ExistingStackContribution = 1.0f;
-
-	for (int32 StackIndex = 0; StackIndex < StackSize; ++StackIndex)
-	{
-		if (CameraModeStack[StackIndex] == CameraMode)
+		if ((StackSize > 0) && (_CameraModeStack[0] == CameraMode))
 		{
-			ExistingStackIndex = StackIndex;
-			ExistingStackContribution *= CameraMode->GetBlendWeight();
-			break;
+			// 들어온 파라미터가 이미 최상단이라면 return
+			return;
+		}
+
+		// See if it's already in the stack and remove it.
+		// Figure out how much it was contributing to the stack.
+		int32 ExistingStackIndex = INDEX_NONE;
+		float ExistingStackContribution = 1.0f;
+
+		for (int32 StackIndex = 0; StackIndex < StackSize; ++StackIndex)
+		{
+			if (_CameraModeStack[StackIndex] == CameraMode)
+			{
+				ExistingStackIndex = StackIndex;
+				ExistingStackContribution *= CameraMode->GetBlendWeight();
+				break;
+			}
+			else
+			{
+				ExistingStackContribution *= (1.0f - _CameraModeStack[StackIndex]->GetBlendWeight());
+			}
+		}
+
+		if (ExistingStackIndex != INDEX_NONE)
+		{
+			_CameraModeStack.RemoveAt(ExistingStackIndex);
+			StackSize--;
 		}
 		else
 		{
-			ExistingStackContribution *= (1.0f - CameraModeStack[StackIndex]->GetBlendWeight());
+			ExistingStackContribution = 0.0f;
 		}
-	}
 
-	if (ExistingStackIndex != INDEX_NONE)
-	{
-		CameraModeStack.RemoveAt(ExistingStackIndex);
-		StackSize--;
+		// Decide what initial weight to start with.
+		// 어떤 초기 가중치로 시작할지 결정합니다.
+		const bool bShouldBlend = ((CameraMode->GetBlendTime() > 0.0f) && (StackSize > 0));
+		const float BlendWeight = (bShouldBlend ? ExistingStackContribution : 1.0f);
+
+		CameraMode->SetBlendWeight(BlendWeight);
+
+		// Add new entry to top of stack.
+		_CameraModeStack.Insert(CameraMode, 0);
+
+		// Make sure stack bottom is always weighted 100%.
+		_CameraModeStack.Last()->SetBlendWeight(1.0f);
+
+		// Let the camera mode know if it's being added to the stack.
+		if (ExistingStackIndex == INDEX_NONE)
+		{
+			CameraMode->OnActivation();
+		}
 	}
 	else
 	{
-		ExistingStackContribution = 0.0f;
-	}
-
-	// Decide what initial weight to start with.
-	const bool bShouldBlend = ((CameraMode->GetBlendTime() > 0.0f) && (StackSize > 0));
-	const float BlendWeight = (bShouldBlend ? ExistingStackContribution : 1.0f);
-
-	CameraMode->SetBlendWeight(BlendWeight);
-
-	// Add new entry to top of stack.
-	CameraModeStack.Insert(CameraMode, 0);
-
-	// Make sure stack bottom is always weighted 100%.
-	CameraModeStack.Last()->SetBlendWeight(1.0f);
-
-	// Let the camera mode know if it's being added to the stack.
-	if (ExistingStackIndex == INDEX_NONE)
-	{
-		CameraMode->OnActivation();
+		check(CameraMode);
 	}
 }
 
 bool UPDCameraModeStack::EvaluateStack(float DeltaTime, FPDCameraModeView& OutCameraModeView)
 {
-	if (!bIsActive)
+	if (!_bIsActive)
 	{
 		return false;
 	}
@@ -343,9 +349,7 @@ bool UPDCameraModeStack::EvaluateStack(float DeltaTime, FPDCameraModeView& OutCa
 UPDCameraMode* UPDCameraModeStack::GetCameraModeInstance(TSubclassOf<UPDCameraMode> CameraModeClass)
 {
 	check(CameraModeClass);
-
-	// First see if we already created one.
-	for (UPDCameraMode* CameraMode : CameraModeInstances)
+	for (UPDCameraMode* CameraMode : _CameraModeInstances)
 	{
 		if ((CameraMode != nullptr) && (CameraMode->GetClass() == CameraModeClass))
 		{
@@ -357,14 +361,14 @@ UPDCameraMode* UPDCameraModeStack::GetCameraModeInstance(TSubclassOf<UPDCameraMo
 	UPDCameraMode* NewCameraMode = NewObject<UPDCameraMode>(GetOuter(), CameraModeClass, NAME_None, RF_NoFlags);
 	check(NewCameraMode);
 
-	CameraModeInstances.Add(NewCameraMode);
+	_CameraModeInstances.Add(NewCameraMode);
 
 	return NewCameraMode;
 }
 
 void UPDCameraModeStack::UpdateStack(float DeltaTime)
 {
-	const int32 StackSize = CameraModeStack.Num();
+	const int32 StackSize = _CameraModeStack.Num();
 	if (StackSize <= 0)
 	{
 		return;
@@ -375,7 +379,7 @@ void UPDCameraModeStack::UpdateStack(float DeltaTime)
 
 	for (int32 StackIndex = 0; StackIndex < StackSize; ++StackIndex)
 	{
-		UPDCameraMode* CameraMode = CameraModeStack[StackIndex];
+		UPDCameraMode* CameraMode = _CameraModeStack[StackIndex];
 		check(CameraMode);
 
 		CameraMode->UpdateCameraMode(DeltaTime);
@@ -394,33 +398,33 @@ void UPDCameraModeStack::UpdateStack(float DeltaTime)
 		// Let the camera modes know they being removed from the stack.
 		for (int32 StackIndex = RemoveIndex; StackIndex < StackSize; ++StackIndex)
 		{
-			UPDCameraMode* CameraMode = CameraModeStack[StackIndex];
+			UPDCameraMode* CameraMode = _CameraModeStack[StackIndex];
 			check(CameraMode);
 
 			CameraMode->OnDeactivation();
 		}
 
-		CameraModeStack.RemoveAt(RemoveIndex, RemoveCount);
+		_CameraModeStack.RemoveAt(RemoveIndex, RemoveCount);
 	}
 }
 
 void UPDCameraModeStack::BlendStack(FPDCameraModeView& OutCameraModeView) const
 {
-	const int32 StackSize = CameraModeStack.Num();
+	const int32 StackSize = _CameraModeStack.Num();
 	if (StackSize <= 0)
 	{
 		return;
 	}
 
 	// Start at the bottom and blend up the stack
-	const UPDCameraMode* CameraMode = CameraModeStack[StackSize - 1];
+	const UPDCameraMode* CameraMode = _CameraModeStack[StackSize - 1];
 	check(CameraMode);
 
 	OutCameraModeView = CameraMode->GetCameraModeView();
 
 	for (int32 StackIndex = (StackSize - 2); StackIndex >= 0; --StackIndex)
 	{
-		CameraMode = CameraModeStack[StackIndex];
+		CameraMode = _CameraModeStack[StackIndex];
 		check(CameraMode);
 
 		OutCameraModeView.Blend(CameraMode->GetCameraModeView(), CameraMode->GetBlendWeight());
@@ -436,7 +440,7 @@ void UPDCameraModeStack::DrawDebug(UCanvas* Canvas) const
 	DisplayDebugManager.SetDrawColor(FColor::Green);
 	DisplayDebugManager.DrawString(FString(TEXT("   --- Camera Modes (Begin) ---")));
 
-	for (const UPDCameraMode* CameraMode : CameraModeStack)
+	for (const UPDCameraMode* CameraMode : _CameraModeStack)
 	{
 		check(CameraMode);
 		CameraMode->DrawDebug(Canvas);
@@ -448,7 +452,7 @@ void UPDCameraModeStack::DrawDebug(UCanvas* Canvas) const
 
 void UPDCameraModeStack::GetBlendInfo(float& OutWeightOfTopLayer, FGameplayTag& OutTagOfTopLayer) const
 {
-	if (CameraModeStack.Num() == 0)
+	if (_CameraModeStack.Num() == 0)
 	{
 		OutWeightOfTopLayer = 1.0f;
 		OutTagOfTopLayer = FGameplayTag();
@@ -456,7 +460,7 @@ void UPDCameraModeStack::GetBlendInfo(float& OutWeightOfTopLayer, FGameplayTag& 
 	}
 	else
 	{
-		UPDCameraMode* TopEntry = CameraModeStack.Last();
+		UPDCameraMode* TopEntry = _CameraModeStack.Last();
 		check(TopEntry);
 		OutWeightOfTopLayer = TopEntry->GetBlendWeight();
 		OutTagOfTopLayer = TopEntry->GetCameraTypeTag();
