@@ -34,7 +34,11 @@ public:
 #endif
 	//~ End UObject interface
 
-	UPROPERTY(EditAnywhere, Category="Input")
+#if WITH_EDITORONLY_DATA
+	virtual void AddAdditionalAssetBundleData(FAssetBundleData& AssetBundleData) override;
+#endif
+
+	UPROPERTY(EditAnywhere, Category = "Input", meta = (AssetBundles = "Client,Server"))
 	TArray<TSoftObjectPtr<const UPDInputConfig>> InputConfigs;
 
 private:

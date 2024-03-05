@@ -7,13 +7,15 @@
 
 #include "Game/Character/Component/PDAIBehaviorComponent.h"
 
+#include "AIController.h"
+
 void UPDBTS_DistanceToTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
-
+	
 	if (OwnerComp.GetAIOwner() && OwnerComp.GetAIOwner()->GetPawn() )
 	{		
-		auto ControlledPawn = OwnerComp.GetAIOwner()->GetPawn();
+		APawn* ControlledPawn = OwnerComp.GetAIOwner()->GetPawn();
 		check(ControlledPawn);
 		
 		if (AActor* TargetActor = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(TEXT("TargetToFollow"))))

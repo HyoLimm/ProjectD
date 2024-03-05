@@ -3,6 +3,9 @@
 
 #include "Game/Input/PDInputModifier.h"
 
+#include "Game/Player/PDLocalPlayer.h"
+#include "Game/Settings/PDSettingsShared.h"
+
 //////////////////////////////////////////////////////////////////////
 // PDInputModifiersHelpers
 

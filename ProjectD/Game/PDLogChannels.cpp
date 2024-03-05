@@ -5,7 +5,7 @@
 
 DEFINE_LOG_CATEGORY(LogPD);
 DEFINE_LOG_CATEGORY(LogPDExperience);
-//DEFINE_LOG_CATEGORY(PDPDAbilitySystem);
+DEFINE_LOG_CATEGORY(LogPDAbilitySystem);
 //DEFINE_LOG_CATEGORY(PDPDTeams);
 
 FString GetClientServerContextString(UObject* ContextObject)

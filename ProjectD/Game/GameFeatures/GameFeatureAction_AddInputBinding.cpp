@@ -16,6 +16,7 @@
 #include "Misc/DataValidation.h"
 #endif
 #include "Game/Character/Component/PDHeroComponent.h"
+#include "GameFeaturesSubsystemSettings.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GameFeatureAction_AddInputBinding)
 
@@ -65,6 +66,15 @@ EDataValidationResult UGameFeatureAction_AddInputBinding::IsDataValid(FDataValid
 
 	return Result;
 }
+
+void UGameFeatureAction_AddInputBinding::AddAdditionalAssetBundleData(FAssetBundleData& AssetBundleData)
+{
+	for (const auto& Entry : InputConfigs)
+	{
+		AssetBundleData.AddBundleAsset(UGameFeaturesSubsystemSettings::LoadStateClient, Entry.ToSoftObjectPath().GetAssetPath());
+	}
+}
+
 #endif
 
 void UGameFeatureAction_AddInputBinding::AddToWorld(const FWorldContext& WorldContext, const FGameFeatureStateChangeContext& ChangeContext)
@@ -137,8 +147,13 @@ void UGameFeatureAction_AddInputBinding::AddInputMappingForPlayer(APawn* Pawn, F
 					{
 						HeroComponent->AddAdditionalInputConfig(BindSet);
 					}
+					//else
+					//{
+					//	check(false);
+					//}
 				}
 			}
+
 			ActiveData.PawnsAddedTo.AddUnique(Pawn);
 		}
 		else

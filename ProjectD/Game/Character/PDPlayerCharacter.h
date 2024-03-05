@@ -18,6 +18,9 @@ class PROJECTD_API APDPlayerCharacter : public APDBaseCharacter
 public:
 	APDPlayerCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+
+
+
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "PD|Character", Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UPDCameraComponent> CameraComponent;

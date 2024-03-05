@@ -7,14 +7,14 @@
 #include "PDCombatBaseComponent.generated.h"
 
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS( Abstract )
 class PROJECTD_API UPDCombatBaseComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
-	// Sets default values for this component's properties
-	UPDCombatBaseComponent();
+
+public:
+	UPDCombatBaseComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 protected:
 	// Called when the game starts

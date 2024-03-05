@@ -26,7 +26,7 @@ UGameSettingRegistry* UPDGameSettingScreen::CreateRegistry()
 		NewRegistry->Initialize(LocalPlayer);
 	}
 
-	return nullptr;
+	return NewRegistry;
 }
 
 void UPDGameSettingScreen::HandleBackAction()

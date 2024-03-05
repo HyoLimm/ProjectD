@@ -3,7 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Game/Ability/PDHealthSet.h"
+
 #include "PDPlayerLevelManagerComponent.generated.h"
 
 
@@ -59,5 +59,5 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 protected:
-	TUniquePtr<FExperiencePoint> _ExperienceData;
+	//TUniquePtr<FExperiencePoint> _ExperienceData;
 };

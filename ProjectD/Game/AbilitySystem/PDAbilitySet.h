@@ -12,6 +12,7 @@
 
 class UAttributeSet;
 class UGameplayEffect;
+class UPDGameplayAbility;
 
 
 class UObject;
@@ -30,8 +31,8 @@ struct FPDAbilitySet_GameplayAbility
 public:
 
 	// Gameplay ability to grant.
-	//UPROPERTY(EditDefaultsOnly)
-	//.//TSubclassOf<UPDGameplayAbility> Ability = nullptr;
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UPDGameplayAbility> Ability = nullptr;
 
 	// Level of ability to grant.
 	UPROPERTY(EditDefaultsOnly)
@@ -97,7 +98,7 @@ public:
 	void AddGameplayEffectHandle(const FActiveGameplayEffectHandle& Handle);
 	void AddAttributeSet(UAttributeSet* Set);
 
-	//void TakeFromAbilitySystem(UPDAbilitySystemComponent* PDASC);
+	void TakeFromAbilitySystem(UPDAbilitySystemComponent* PDASC);
 
 protected:
 
@@ -119,6 +120,7 @@ protected:
  * UPDAbilitySet
  *
  *	Non-mutable data asset used to grant gameplay abilities and gameplay effects.
+ *  gameplay effects과 gameplay abilities를 부여하는 데 사용되는 불변 데이터 자산입니다.
  */
 UCLASS(BlueprintType, Const)
 class UPDAbilitySet : public UPrimaryDataAsset
@@ -129,9 +131,10 @@ public:
 
 	UPDAbilitySet(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	// Grants the ability set to the specified ability system component.
+	//  Grants the ability set to the specified ability system component. 지정한 능력 시스템 구성 요소에 능력 세트를 부여합니다.
 	// The returned handles can be used later to take away anything that was granted.
-	//void GiveToAbilitySystem(UPDAbilitySystemComponent* PdASC, FPDAbilitySet_GrantedHandles* OutGrantedHandles, UObject* SourceObject = nullptr) const;
+	//반환된 handles은 나중에 부여된 모든 것을 가져가기 위해 사용할 수 있습니다.
+	void GiveToAbilitySystem(UPDAbilitySystemComponent* PdASC, FPDAbilitySet_GrantedHandles* OutGrantedHandles, UObject* SourceObject = nullptr) const;
 
 protected:
 

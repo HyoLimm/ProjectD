@@ -72,11 +72,21 @@ class UPDSettingsShared : public USaveGame
 	GENERATED_BODY()
 
 public:
-	//DECLARE_EVENT_OneParam(UPDSettingsShared, FOnSettingChangedEvent, UPDSettingsShared* Settings);
-	//FOnSettingChangedEvent OnSettingChanged;
+	DECLARE_EVENT_OneParam(UPDSettingsShared, FOnSettingChangedEvent, UPDSettingsShared* Settings);
+	FOnSettingChangedEvent OnSettingChanged;
 
 
+public:
+	UFUNCTION()
+	bool GetForceFeedbackEnabled() const { return bForceFeedbackEnabled; }
 
+	UFUNCTION()
+	void SetForceFeedbackEnabled(const bool NewValue) { ChangeValueAndDirty(bForceFeedbackEnabled, NewValue); }
+
+private:
+	/** Is force feedback enabled when a controller is being used? */
+	UPROPERTY()
+	bool bForceFeedbackEnabled = true;
 public:
 	//UPDSettingsShared();
 
@@ -90,7 +100,28 @@ public:
 
 	UFUNCTION()
 	bool GetInvertHorizontalAxis() const { return bInvertHorizontalAxis; }
+	////////////////////////////////////////////////////////
+	// Culture / language
+public:
+	/** Gets the pending culture */
+	const FString& GetPendingCulture() const;
 
+	/** Sets the pending culture to apply */
+	void SetPendingCulture(const FString& NewCulture);
+
+	// Called when the culture changes.
+	void OnCultureChanged();
+
+	/** Clears the pending culture to apply */
+	void ClearPendingCulture();
+
+	bool IsUsingDefaultCulture() const;
+
+	void ResetToDefaultCulture();
+	bool ShouldResetToDefaultCulture() const { return bResetToDefaultCulture; }
+
+	void ApplyCultureSettings();
+	void ResetCultureToCurrentSettings();
 private:
 	/** If true then the vertical look axis should be inverted */
 	UPROPERTY()
@@ -109,8 +140,33 @@ private:
 	UPROPERTY()
 	double MouseSensitivityY = 0.5;
 
+private:
+	/** The pending culture to apply */
+	UPROPERTY(Transient)
+	FString PendingCulture;
+
+	/* If true, resets the culture to default. */
+	bool bResetToDefaultCulture = false;
 
 private:
 	UPROPERTY(Transient)
 	TObjectPtr<UPDLocalPlayer> OwningPlayer = nullptr;
+
+private:
+	template<typename T>
+	bool ChangeValueAndDirty(T& CurrentValue, const T& NewValue)
+	{
+		if (CurrentValue != NewValue)
+		{
+			CurrentValue = NewValue;
+			bIsDirty = true;
+			OnSettingChanged.Broadcast(this);
+
+			return true;
+		}
+
+		return false;
+	}
+
+	bool bIsDirty = false;
 };

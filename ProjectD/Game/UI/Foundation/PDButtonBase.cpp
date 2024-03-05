@@ -30,12 +30,6 @@ void UPDButtonBase::UpdateInputActionWidget()
 	RefreshButtonText();
 }
 
-void UPDButtonBase::OnInputMethodChanged(ECommonInputType CurrentInputType)
-{
-	Super::OnInputMethodChanged(CurrentInputType);
-
-	BP_UpdateButtonStyle();
-}
 
 void UPDButtonBase::RefreshButtonText()
 {
@@ -53,4 +47,11 @@ void UPDButtonBase::RefreshButtonText()
 	}
 
 	BP_UpdateButtonText(ButtonText);
+}
+
+void UPDButtonBase::OnInputMethodChanged(ECommonInputType CurrentInputType)
+{
+	Super::OnInputMethodChanged(CurrentInputType);
+
+	BP_UpdateButtonStyle();
 }

@@ -14,6 +14,7 @@ struct FPDBundles
 
 
 class UPDPawnData;
+class UPDGameData;
 
 
 UCLASS(Config = Game)
@@ -33,14 +34,43 @@ public:
 	template<typename AssetType>
 	static AssetType* GetAsset(const TSoftObjectPtr<AssetType>& AssetPointer, bool bKeepInMemory = true);
 
+	// Returns the subclass referenced by a TSoftClassPtr.  This will synchronously load the asset if it's not already loaded.
+	template<typename AssetType>
+	static TSubclassOf<AssetType> GetSubclass(const TSoftClassPtr<AssetType>& AssetPointer, bool bKeepInMemory = true);
 
 
+	const UPDGameData& GetGameData();
 	const UPDPawnData* GetDefaultPawnData() const;
+protected:
 
+	UPrimaryDataAsset* LoadGameDataOfClass(TSubclassOf<UPrimaryDataAsset> DataClass, const TSoftObjectPtr<UPrimaryDataAsset>& DataClassPath, FPrimaryAssetType PrimaryAssetType);
+
+
+	template <typename GameDataClass>
+	const GameDataClass& GetOrLoadTypedGameData(const TSoftObjectPtr<GameDataClass>& DataPath)
+	{
+		if (TObjectPtr<UPrimaryDataAsset> const* pResult = GameDataMap.Find(GameDataClass::StaticClass()))
+		{
+			return *CastChecked<GameDataClass>(*pResult);
+		}
+
+		// Does a blocking load if needed
+		return *CastChecked<const GameDataClass>(LoadGameDataOfClass(GameDataClass::StaticClass(), DataPath, GameDataClass::StaticClass()->GetFName()));
+	}
 
 	// Pawn data used when spawning player pawns if there isn't one set on the player state.
 	UPROPERTY(Config)
 	TSoftObjectPtr<UPDPawnData> DefaultPawnData;
+
+protected:
+
+	// Global game data asset to use.
+	UPROPERTY(Config)
+	TSoftObjectPtr<UPDGameData> PDGameDataPath;
+
+	// Loaded version of the game data
+	UPROPERTY(Transient)
+	TMap<TObjectPtr<UClass>, TObjectPtr<UPrimaryDataAsset>> GameDataMap;
 
 protected:
 	static UObject* SynchronousLoadAsset(const FSoftObjectPath& AssetPath);
@@ -66,14 +96,17 @@ private:
 template<typename AssetType>
 AssetType* UPDAssetManager::GetAsset(const TSoftObjectPtr<AssetType>& AssetPointer, bool bKeepInMemory /*= true*/)
 {
-	AssetType* LoadedAsset = nullptr;
 
-	const FSoftObjectPath& AssetPath = AssetPointer.ToSoftObjectPath();
-
-	if (AssetPath.IsValid())
+	do
 	{
-		LoadedAsset = AssetPointer.Get();
-		if (!LoadedAsset)
+		const FSoftObjectPath& AssetPath = AssetPointer.ToSoftObjectPath();
+		if (false == AssetPath.IsValid())
+		{
+			break;
+		}
+
+		AssetType* LoadedAsset = AssetPointer.Get();
+		if (false == LoadedAsset)
 		{
 			LoadedAsset = Cast<AssetType>(SynchronousLoadAsset(AssetPath));
 			ensureAlwaysMsgf(LoadedAsset, TEXT("Failed to load asset [%s]"), *AssetPointer.ToString());
@@ -84,7 +117,37 @@ AssetType* UPDAssetManager::GetAsset(const TSoftObjectPtr<AssetType>& AssetPoint
 			// Added to loaded asset list.
 			Get().AddLoadedAsset(Cast<UObject>(LoadedAsset));
 		}
+
+		return LoadedAsset;
+
+	} while (false);
+
+	return nullptr;
+}
+
+
+template<typename AssetType>
+TSubclassOf<AssetType> UPDAssetManager::GetSubclass(const TSoftClassPtr<AssetType>& AssetPointer, bool bKeepInMemory)
+{
+	TSubclassOf<AssetType> LoadedSubclass;
+
+	const FSoftObjectPath& AssetPath = AssetPointer.ToSoftObjectPath();
+
+	if (AssetPath.IsValid())
+	{
+		LoadedSubclass = AssetPointer.Get();
+		if (!LoadedSubclass)
+		{
+			LoadedSubclass = Cast<UClass>(SynchronousLoadAsset(AssetPath));
+			ensureAlwaysMsgf(LoadedSubclass, TEXT("Failed to load asset class [%s]"), *AssetPointer.ToString());
+		}
+
+		if (LoadedSubclass && bKeepInMemory)
+		{
+			// Added to loaded asset list.
+			Get().AddLoadedAsset(Cast<UObject>(LoadedSubclass));
+		}
 	}
 
-	return LoadedAsset;
+	return LoadedSubclass;
 }

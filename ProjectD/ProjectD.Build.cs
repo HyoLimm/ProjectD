@@ -9,8 +9,7 @@ public class ProjectD : ModuleRules
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
         PublicIncludePaths.AddRange(
             new string[] {
-                        "ProjectD",
-                        "Game"
+                        "ProjectD"
             }
         );
 
@@ -34,7 +33,9 @@ public class ProjectD : ModuleRules
                 "GameplayTasks",
                 "GameplayAbilities",                
                 "GameFeatures",
-          
+                "PhysicsCore",
+                "ReplicationGraph"
+
             }
         );
 
@@ -51,7 +52,13 @@ public class ProjectD : ModuleRules
                 "CommonGame",
                 "CommonUser",
                 "UIExtension",
+                "GameplayMessageRuntime",
+                "NetCore",
             }
         );
-}
+
+
+
+        SetupIrisSupport(Target);
+    }
 }

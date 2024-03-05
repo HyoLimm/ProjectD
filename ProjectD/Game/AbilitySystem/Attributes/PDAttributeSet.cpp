@@ -16,3 +16,8 @@ UWorld* UPDAttributeSet::GetWorld() const
 
 	return Outer->GetWorld();
 }
+
+UPDAbilitySystemComponent* UPDAttributeSet::GetPDAbilitySystemComponent() const
+{
+	return Cast<UPDAbilitySystemComponent>(GetOwningAbilitySystemComponent());
+}

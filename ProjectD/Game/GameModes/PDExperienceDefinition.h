@@ -33,7 +33,7 @@ public:
 	//~End of UPrimaryDataAsset interface
 
 public:
-	// List of Game Feature Plugins this experience wants to have active
+	// 이 경험이 활성화하기를 원하는 게임 기능 플러그인 목록
 	UPROPERTY(EditDefaultsOnly, Category = Gameplay)
 	TArray<FString> GameFeaturesToEnable;
 
@@ -43,10 +43,12 @@ public:
 	TObjectPtr<const UPDPawnData> DefaultPawnData;
 
 	// List of actions to perform as this experience is loaded/activated/deactivated/unloaded
+	// 이 경험이 로드/활성화/비활성화/언로드될 때 수행할 작업 목록
 	UPROPERTY(EditDefaultsOnly, Instanced, Category="Actions")
 	TArray<TObjectPtr<UGameFeatureAction>> Actions;
 
 	// List of additional action sets to compose into this experience
+	// 이 경험으로 구성할 추가 작업 세트 목록
 	UPROPERTY(EditDefaultsOnly, Category=Gameplay)
 	TArray<TObjectPtr<UPDExperienceActionSet>> ActionSets;
 };

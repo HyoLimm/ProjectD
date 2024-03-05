@@ -12,6 +12,12 @@ UPDCameraComponent::UPDCameraComponent(const FObjectInitializer& ObjectInitializ
 	_FieldOfViewOffset = 0.0f;
 }
 
+void UPDCameraComponent::GetBlendInfo(float& OutWeightOfTopLayer, FGameplayTag& OutTagOfTopLayer) const
+{
+	check(_CameraModeStack);
+	_CameraModeStack->GetBlendInfo(/*out*/ OutWeightOfTopLayer, /*out*/ OutTagOfTopLayer);
+}
+
 void UPDCameraComponent::OnRegister()
 {
 	Super::OnRegister();
@@ -40,7 +46,6 @@ void UPDCameraComponent::GetCameraView(float DeltaTime, FMinimalViewInfo& OutDes
 			}
 		}
 
-	// Apply any offset that was added to the field of view.
 	// 시야에 추가된 오프셋을 적용합니다.
 	CameraModeView._FieldOfView += _FieldOfViewOffset;
 	//_FieldOfViewOffset = 0.0f;

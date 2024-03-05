@@ -29,6 +29,10 @@ public:
 
 	FPDCameraModeDelegate			DetermineCameraModeDelegate;
 
+
+	// Gets the tag associated with the top layer and the blend weight of it
+	void GetBlendInfo(float& OutWeightOfTopLayer, FGameplayTag& OutTagOfTopLayer) const;
+
 protected:
 	//~ Begin UActorComponent interface
 	virtual void					OnRegister() override;

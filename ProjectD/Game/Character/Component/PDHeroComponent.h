@@ -7,9 +7,11 @@
 #include "Components/PawnComponent.h"
 
 #include "Game/GameFeatures/GameFeatureAction_AddInputContextMapping.h"
+#include "GameplayAbilitySpecHandle.h"
 #include "PDHeroComponent.generated.h"
 
 class UPDCameraMode;
+class UPDInputConfig;
 struct FMappableConfigPair;
 struct FInputActionValue;
 
@@ -21,8 +23,14 @@ class PROJECTD_API UPDHeroComponent : public UPawnComponent, public IGameFramewo
 {
 	GENERATED_BODY()
 public:
-
 	UPDHeroComponent(const FObjectInitializer& ObjectInitializer);
+	
+	UFUNCTION(BlueprintPure, Category = "PD|Hero")
+	static UPDHeroComponent* FindHeroComponent(const AActor* Actor) { return (Actor ? Actor->FindComponentByClass<UPDHeroComponent>() : nullptr); }
+
+	
+	void SetAbilityCameraMode(TSubclassOf<UPDCameraMode> CameraMode, const FGameplayAbilitySpecHandle& OwningSpecHandle);	
+	void ClearAbilityCameraMode(const FGameplayAbilitySpecHandle& OwningSpecHandle);
 
 
 	/** The name of the extension event sent via UGameFrameworkComponentManager when ability inputs are ready to bind */
@@ -30,7 +38,6 @@ public:
 
 	/** The name of this component-implemented feature */
 	static const FName NAME_ActorFeatureName;
-
 
 
 	//~ Begin IGameFrameworkInitStateInterface interface
@@ -72,6 +79,9 @@ protected:
 
 
 protected:
+	/** Spec handle for the last ability to set a camera mode. */
+	FGameplayAbilitySpecHandle AbilityCameraModeOwningSpecHandle;
+
 
 	UPROPERTY(EditAnywhere)
 	TArray<FInputMappingContextAndPriority> _DefaultInputMappings;
@@ -79,8 +89,8 @@ protected:
 
 	/** 기능에 의해 설정된 카메라 모드 */
 	UPROPERTY()
-	TSubclassOf<UPDCameraMode> AbilityCameraMode;
+	TSubclassOf<UPDCameraMode> _AbilityCameraMode;
 
 	/** True when player input bindings have been applied, will never be true for non - players */
-	bool bReadyToBindInputs;
+	bool _bReadyToBindInputs;
 };

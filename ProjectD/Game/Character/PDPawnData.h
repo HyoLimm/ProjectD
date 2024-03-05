@@ -10,6 +10,7 @@ class APawn;
 class UPDCameraMode;
 class UPDInputConfig;
 class UPDAbilitySet;
+class UPDAbilityTagRelationshipMapping;
 
 
 UCLASS(BlueprintType, Const, Meta = (DisplayName = "PD Pawn Data", ShortTooltip = "Data asset used to define a Pawn."))
@@ -25,6 +26,11 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "PD|Pawn")
 	TSubclassOf<APawn> PawnClass;
+
+
+	// What mapping of ability tags to use for actions taking by this pawn
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "PD|Abilities")
+	TObjectPtr<UPDAbilityTagRelationshipMapping> TagRelationshipMapping;
 
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "PD|Input")

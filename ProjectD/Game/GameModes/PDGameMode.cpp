@@ -10,10 +10,13 @@
 #include "Game/Character/Component/PDPawnExtensionComponent.h"
 #include "Game/Character/PDBaseCharacter.h"
 #include "Game/System/PDAssetManager.h"
+#include "Game/UI/PDHUD.h"
 #include "PDExperienceManagerComponent.h"
 #include "PDExperienceDefinition.h"
 #include "PDGameState.h"
 #include "Game/GameModes/PDEnemyManagerComponent.h"
+#include "Game/Development/PDDeveloperSettings.h"
+#include "Game/GameModes/PDWorldSettings.h"
 
 APDGameMode::APDGameMode(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer)
@@ -152,7 +155,25 @@ bool APDGameMode::IsExperienceLoaded() const
 void APDGameMode::HandleMatchAssignmentIfNotExpectingOne()
 {
 	FPrimaryAssetId ExperienceId;
-	
+	FString ExperienceIdSource;
+
+	UWorld* World = GetWorld();
+	if (!ExperienceId.IsValid() && World->IsPlayInEditor())
+	{
+		ExperienceId = GetDefault<UPDDeveloperSettings>()->ExperienceOverride;
+		ExperienceIdSource = TEXT("DeveloperSettings");
+	}
+
+	// see if the world settings has a default experience
+	if (!ExperienceId.IsValid())
+	{
+		if (APDWorldSettings* TypedWorldSettings = Cast<APDWorldSettings>(GetWorldSettings()))
+		{
+			ExperienceId = TypedWorldSettings->GetDefaultGameplayExperience();
+			ExperienceIdSource = TEXT("WorldSettings");
+		}
+	}
+
 	FAssetData Dummy;
 	if (ExperienceId.IsValid() && false == UPDAssetManager::Get().GetPrimaryAssetData(ExperienceId, /*out*/ Dummy))
 	{
@@ -161,7 +182,7 @@ void APDGameMode::HandleMatchAssignmentIfNotExpectingOne()
 	}
 
 
-	FString ExperienceIdSource;
+
 	// Final fallback to the default experience
 	if (!ExperienceId.IsValid())
 	{

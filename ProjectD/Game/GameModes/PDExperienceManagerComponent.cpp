@@ -4,6 +4,12 @@
 #include "Game/GameModes/PDExperienceManagerComponent.h"
 #include "PDExperienceDefinition.h"
 #include "Game/System/PDAssetManager.h"
+#include "PDExperienceActionSet.h"
+#include "GameFeaturesSubsystem.h"
+#include "Game/PDLogChannels.h"
+#include "GameFeaturesSubsystemSettings.h"
+#include "Game/GameModes/PDExperienceManager.h"
+#include "GameFeatureAction.h"
 
 
 namespace PDConsoleVariables
@@ -36,6 +42,85 @@ UPDExperienceManagerComponent::UPDExperienceManagerComponent(const FObjectInitia
 }
 
 
+
+void UPDExperienceManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	// deactivate any features this experience loaded
+	//@TODO: This should be handled FILO as well
+	for (const FString& PluginURL : GameFeaturePluginURLs)
+	{
+		//if (UPDExperienceManager::RequestToDeactivatePlugin(PluginURL))
+		//{
+		//	UGameFeaturesSubsystem::Get().DeactivateGameFeaturePlugin(PluginURL);
+		//}
+	}
+
+	//@TODO: Ensure proper handling of a partially-loaded state too
+	if (_LoadState == EPDExperienceLoadState::Loaded)
+	{
+		_LoadState = EPDExperienceLoadState::Deactivating;
+
+		// Make sure we won't complete the transition prematurely if someone registers as a pauser but fires immediately
+		NumExpectedPausers = INDEX_NONE;
+		NumObservedPausers = 0;
+
+		// Deactivate and unload the actions
+		FGameFeatureDeactivatingContext Context(TEXT(""), [this](FStringView) { this->OnActionDeactivationCompleted(); });
+
+		const FWorldContext* ExistingWorldContext = GEngine->GetWorldContextFromWorld(GetWorld());
+		if (ExistingWorldContext)
+		{
+			Context.SetRequiredWorldContextHandle(ExistingWorldContext->ContextHandle);
+		}
+
+		auto DeactivateListOfActions = [&Context](const TArray<UGameFeatureAction*>& ActionList)
+			{
+				for (UGameFeatureAction* Action : ActionList)
+				{
+					if (Action)
+					{
+						Action->OnGameFeatureDeactivating(Context);
+						Action->OnGameFeatureUnregistering();
+					}
+				}
+			};
+
+		DeactivateListOfActions(_CurrentExperience->Actions);
+		for (const TObjectPtr<UPDExperienceActionSet>& ActionSet : _CurrentExperience->ActionSets)
+		{
+			if (ActionSet != nullptr)
+			{
+				DeactivateListOfActions(ActionSet->Actions);
+			}
+		}
+
+		NumExpectedPausers = Context.GetNumPausers();
+
+		if (NumExpectedPausers > 0)
+		{
+			UE_LOG(LogPDExperience, Error, TEXT("Actions that have asynchronous deactivation aren't fully supported yet in Lyra experiences"));
+		}
+
+		if (NumExpectedPausers == NumObservedPausers)
+		{
+			OnAllActionsDeactivated();
+		}
+	}
+}
+
+void UPDExperienceManagerComponent::CallOrRegister_OnExperienceLoaded_HighPriority(FOnPDExperienceLoaded::FDelegate&& Delegate)
+{
+	if (IsExperienceLoaded())
+	{
+		Delegate.Execute(_CurrentExperience);
+	}
+	else
+	{
+		OnExperienceLoaded_HighPriority.Add(MoveTemp(Delegate));
+	}
+}
 
 bool UPDExperienceManagerComponent::IsExperienceLoaded() const
 {
@@ -113,7 +198,6 @@ void UPDExperienceManagerComponent::StartExperienceLoad()
 		Handle = BundleLoadHandle.IsValid() ? BundleLoadHandle : RawLoadHandle;
 	}
 
-	//OnExperienceLoadComplete();
 	FStreamableDelegate OnAssetsLoadedDelegate = FStreamableDelegate::CreateUObject(this, &ThisClass::OnExperienceLoadComplete);
 	if (!Handle.IsValid() || Handle->HasLoadCompleted())
 	{
@@ -178,13 +262,13 @@ void UPDExperienceManagerComponent::OnExperienceLoadComplete()
 		};
 
 	CollectGameFeaturePluginURLs(_CurrentExperience, _CurrentExperience->GameFeaturesToEnable);
-	//for (const TObjectPtr<ULyraExperienceActionSet>& ActionSet : CurrentExperience->ActionSets)
-	//{
-	//	if (ActionSet != nullptr)
-	//	{
-	//		CollectGameFeaturePluginURLs(ActionSet, ActionSet->GameFeaturesToEnable);
-	//	}
-	//}
+	for (const TObjectPtr<UPDExperienceActionSet>& ActionSet : _CurrentExperience->ActionSets)
+	{
+		if (ActionSet != nullptr)
+		{
+			CollectGameFeaturePluginURLs(ActionSet, ActionSet->GameFeaturesToEnable);
+		}
+	}
 
 	// Load and activate the features	
 	NumGameFeaturePluginsLoading = GameFeaturePluginURLs.Num();
@@ -193,8 +277,8 @@ void UPDExperienceManagerComponent::OnExperienceLoadComplete()
 		_LoadState = EPDExperienceLoadState::LoadingGameFeatures;
 		for (const FString& PluginURL : GameFeaturePluginURLs)
 		{
-			/*UPDExperienceManager::NotifyOfPluginActivation(PluginURL);
-			UGameFeaturesSubsystem::Get().LoadAndActivateGameFeaturePlugin(PluginURL, FGameFeaturePluginLoadComplete::CreateUObject(this, &ThisClass::OnGameFeaturePluginLoadComplete));*/
+			UPDExperienceManager::NotifyOfPluginActivation(PluginURL);
+			UGameFeaturesSubsystem::Get().LoadAndActivateGameFeaturePlugin(PluginURL, FGameFeaturePluginLoadComplete::CreateUObject(this, &ThisClass::OnGameFeaturePluginLoadComplete));
 		}
 	}
 	else
@@ -202,11 +286,17 @@ void UPDExperienceManagerComponent::OnExperienceLoadComplete()
 		OnExperienceFullLoadCompleted();
 	}
 }
-//
-//void UPDExperienceManagerComponent::OnGameFeaturePluginLoadComplete(const UE::GameFeatures::FResult& Result)
-//{
-//
-//}
+
+void UPDExperienceManagerComponent::OnGameFeaturePluginLoadComplete(const UE::GameFeatures::FResult& Result)
+{
+	// decrement the number of plugins that are loading
+	NumGameFeaturePluginsLoading--;
+
+	if (NumGameFeaturePluginsLoading == 0)
+	{
+		OnExperienceFullLoadCompleted();
+	}
+}
 
 void UPDExperienceManagerComponent::OnExperienceFullLoadCompleted()
 {
@@ -266,14 +356,14 @@ void UPDExperienceManagerComponent::OnExperienceFullLoadCompleted()
 
 	_LoadState = EPDExperienceLoadState::Loaded;
 
-	//OnExperienceLoaded_HighPriority.Broadcast(CurrentExperience);
-	//OnExperienceLoaded_HighPriority.Clear();
+	OnExperienceLoaded_HighPriority.Broadcast(_CurrentExperience);
+	OnExperienceLoaded_HighPriority.Clear();
 
 	OnExperienceLoaded.Broadcast(_CurrentExperience);
 	OnExperienceLoaded.Clear();
 
-	//OnExperienceLoaded_LowPriority.Broadcast(CurrentExperience);
-	//OnExperienceLoaded_LowPriority.Clear();
+	OnExperienceLoaded_LowPriority.Broadcast(_CurrentExperience);
+	OnExperienceLoaded_LowPriority.Clear();
 
 	// Apply any necessary scalability settings
 //#if !UE_SERVER
@@ -283,12 +373,21 @@ void UPDExperienceManagerComponent::OnExperienceFullLoadCompleted()
 
 void UPDExperienceManagerComponent::OnActionDeactivationCompleted()
 {
+	check(IsInGameThread());
+	++NumObservedPausers;
 
+	if (NumObservedPausers == NumExpectedPausers)
+	{
+		OnAllActionsDeactivated();
+	}
 }
 
 void UPDExperienceManagerComponent::OnAllActionsDeactivated()
 {
-
+	//@TODO: We actually only deactivated and didn't fully unload...
+	_LoadState = EPDExperienceLoadState::Unloaded;
+	_CurrentExperience = nullptr;
+	//@TODO:	GEngine->ForceGarbageCollection(true);
 }
 
 void UPDExperienceManagerComponent::CallOrRegister_OnExperienceLoaded(FOnPDExperienceLoaded::FDelegate&& Delegate)
@@ -300,6 +399,18 @@ void UPDExperienceManagerComponent::CallOrRegister_OnExperienceLoaded(FOnPDExper
 	else
 	{
 		OnExperienceLoaded.Add(MoveTemp(Delegate));
+	}
+}
+
+void UPDExperienceManagerComponent::CallOrRegister_OnExperienceLoaded_LowPriority(FOnPDExperienceLoaded::FDelegate&& Delegate)
+{
+	if (IsExperienceLoaded())
+	{
+		Delegate.Execute(_CurrentExperience);
+	}
+	else
+	{
+		OnExperienceLoaded_LowPriority.Add(MoveTemp(Delegate));
 	}
 }
 

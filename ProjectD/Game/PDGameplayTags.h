@@ -9,13 +9,13 @@ namespace PDGameplayTags
 	PROJECTD_API	FGameplayTag FindTagByString(const FString& TagString, bool bMatchPartialString = false);
 
 	// Declare all of the custom native tags that PD will use
-	//PROJECTD_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_ActivateFail_IsDead);
-	//PROJECTD_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_ActivateFail_Cooldown);
-	//PROJECTD_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_ActivateFail_Cost);
-	//PROJECTD_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_ActivateFail_TagsBlocked);
-	//PROJECTD_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_ActivateFail_TagsMissing);
-	//PROJECTD_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_ActivateFail_Networking);
-	//PROJECTD_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_ActivateFail_ActivationGroup);
+	PROJECTD_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_ActivateFail_IsDead);
+	PROJECTD_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_ActivateFail_Cooldown);
+	PROJECTD_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_ActivateFail_Cost);
+	PROJECTD_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_ActivateFail_TagsBlocked);
+	PROJECTD_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_ActivateFail_TagsMissing);
+	PROJECTD_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_ActivateFail_Networking);
+	PROJECTD_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_ActivateFail_ActivationGroup);
 
 	PROJECTD_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_Behavior_SurvivesDeath);
 
@@ -36,6 +36,7 @@ namespace PDGameplayTags
 
 	PROJECTD_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(SetByCaller_Damage);
 	PROJECTD_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(SetByCaller_Heal);
+	PROJECTD_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(SetByCaller_Experience);
 
 	PROJECTD_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Cheat_GodMode);
 	PROJECTD_API	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Cheat_UnlimitedHealth);

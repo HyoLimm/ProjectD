@@ -40,12 +40,15 @@ protected:
 	virtual void OnInitialize(ULocalPlayer* InLocalPlayer) override;
 	virtual bool IsFinishedInitializing() const override;
 
+	UGameSettingCollection* InitializeGameplaySettings(UPDLocalPlayer* InLocalPlayer);
+
+
 	/*UGameSettingCollection* InitializeVideoSettings(UPDLocalPlayer* InLocalPlayer);
 	void InitializeVideoSettings_FrameRates(UGameSettingCollection* Screen, UPDLocalPlayer* InLocalPlayer);
 	void AddPerformanceStatPage(UGameSettingCollection* Screen, UPDLocalPlayer* InLocalPlayer);
 
 	UGameSettingCollection* InitializeAudioSettings(UPDLocalPlayer* InLocalPlayer);
-	UGameSettingCollection* InitializeGameplaySettings(UPDLocalPlayer* InLocalPlayer);
+
 
 	UGameSettingCollection* InitializeMouseAndKeyboardSettings(UPDLocalPlayer* InLocalPlayer);
 	UGameSettingCollection* InitializeGamepadSettings(UPDLocalPlayer* InLocalPlayer);*/

@@ -40,26 +40,24 @@ public:
 	void SetPawnData(const UPDPawnData* InPawnData);
 
 
-
-	///** Gets the current ability system component, which may be owned by a different actor */
-	///** 다른 액터가 소유할 수 있는 현재 ability system component를 가져옵니다*/
-	//UFUNCTION(BlueprintPure, Category = "PD|Pawn")
-	//UPDAbilitySystemComponent* GetPDAbilitySystemComponent() const { return AbilitySystemComponent; }
-
+		/** Gets the current ability system component, which may be owned by a different actor */
+	UFUNCTION(BlueprintPure, Category = "PD|Pawn")
+	UPDAbilitySystemComponent* GetPDAbilitySystemComponent() const { return AbilitySystemComponent; }
 
 public:
-
-
 	/** Should be called by the owning pawn to become the avatar of the ability system. */
 	void InitializeAbilitySystem(UPDAbilitySystemComponent* InASC, AActor* InOwnerActor);
+
+	/** Should be called by the owning pawn to remove itself as the avatar of the ability system. */
+	void UninitializeAbilitySystem();
+
+
+	/** Should be called by the owning pawn when the pawn's controller changes. */
+	void HandleControllerChanged();
 
 
 	/** Should be called by the owning pawn when the input component is setup. */
 	void SetupPlayerInputComponent();
-
-
-	/** Should be called by the owning pawn to remove itself as the avatar of the ability system. */
-	void UninitializeAbilitySystem();
 
 
 	/** Register with the OnAbilitySystemInitialized delegate and broadcast if our pawn has been registered with the ability system component */
@@ -87,6 +85,6 @@ protected:
 	TObjectPtr<const UPDPawnData> PawnData;
 
 	///** Pointer to the ability system component that is cached for convenience. */
-	//UPROPERTY()
-	//TObjectPtr<UPDAbilitySystemComponent> AbilitySystemComponent;
+	UPROPERTY()
+	TObjectPtr<UPDAbilitySystemComponent> AbilitySystemComponent;
 };

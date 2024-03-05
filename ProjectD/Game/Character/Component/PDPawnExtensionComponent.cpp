@@ -84,10 +84,11 @@ bool UPDPawnExtensionComponent::CanChangeInitState(UGameFrameworkComponentManage
 	if (CurrentState == PDGameplayTags::InitState_Spawned && DesiredState == PDGameplayTags::InitState_DataAvailable)
 	{
 		// Pawn data is required.
-		if (!PawnData)
-		{
-			return false;
-		}
+		//if (!PawnData)
+		//{
+		//	check(false);
+		//	return false;
+		//}
 
 		const bool bHasAuthority = Pawn->HasAuthority();
 		const bool bIsLocallyControlled = Pawn->IsLocallyControlled();
@@ -98,6 +99,7 @@ bool UPDPawnExtensionComponent::CanChangeInitState(UGameFrameworkComponentManage
 			// 컨트롤러가 장착되어 있는지 확인합니다.
 			if (!GetController<AController>())
 			{
+
 				return false;
 			}
 		}
@@ -113,7 +115,7 @@ bool UPDPawnExtensionComponent::CanChangeInitState(UGameFrameworkComponentManage
 	{
 		return true;
 	}
-
+	check(false);
 	return false;
 }
 
@@ -179,47 +181,47 @@ void UPDPawnExtensionComponent::SetPawnData(const UPDPawnData* InPawnData)
 
 void UPDPawnExtensionComponent::InitializeAbilitySystem(UPDAbilitySystemComponent* InASC, AActor* InOwnerActor)
 {
-	//AbilitySystemComponent	check(InASC);
-	//check(InOwnerActor);
+	check(InASC);
+	check(InOwnerActor);
 
-	//if (AbilitySystemComponent == InASC)
-	//{
-	//	// The ability system component hasn't changed.
-	//	return;
-	//}
+	if (AbilitySystemComponent == InASC)
+	{
+		// The ability system component hasn't changed.
+		return;
+	}
 
-	//if (AbilitySystemComponent)
-	//{
-	//	// Clean up the old ability system component.
-	//	UninitializeAbilitySystem();
-	//}
+	if (AbilitySystemComponent)
+	{
+		// Clean up the old ability system component.
+		UninitializeAbilitySystem();
+	}
 
-	//APawn* Pawn = GetPawnChecked<APawn>();
-	//AActor* ExistingAvatar = InASC->GetAvatarActor();
+	APawn* Pawn = GetPawnChecked<APawn>();
+	AActor* ExistingAvatar = InASC->GetAvatarActor();
 
-	////UE_LOG(Log, Verbose, TEXT("Setting up ASC [%s] on pawn [%s] owner [%s], existing [%s] "), *GetNameSafe(InASC), *GetNameSafe(Pawn), *GetNameSafe(InOwnerActor), *GetNameSafe(ExistingAvatar));
+	UE_LOG(LogPD, Verbose, TEXT("Setting up ASC [%s] on pawn [%s] owner [%s], existing [%s] "), *GetNameSafe(InASC), *GetNameSafe(Pawn), *GetNameSafe(InOwnerActor), *GetNameSafe(ExistingAvatar));
 
-	//if ((ExistingAvatar != nullptr) && (ExistingAvatar != Pawn))
-	//{
-	//	//UE_LOG(Log, Log, TEXT("Existing avatar (authority=%d)"), ExistingAvatar->HasAuthority() ? 1 : 0);
+	if ((ExistingAvatar != nullptr) && (ExistingAvatar != Pawn))
+	{
+		//UE_LOG(Log, Log, TEXT("Existing avatar (authority=%d)"), ExistingAvatar->HasAuthority() ? 1 : 0);
 
-	//	// There is already a pawn acting as the ASC's avatar, so we need to kick it out
-	//	// This can happen on clients if they're lagged: their new pawn is spawned + possessed before the dead one is removed
-	//	ensure(!ExistingAvatar->HasAuthority());
+		// There is already a pawn acting as the ASC's avatar, so we need to kick it out
+		// This can happen on clients if they're lagged: their new pawn is spawned + possessed before the dead one is removed
+		ensure(!ExistingAvatar->HasAuthority());
 
-	//	if (UPDPawnExtensionComponent* OtherExtensionComponent = FindPawnExtensionComponent(ExistingAvatar))
-	//	{
-	//		OtherExtensionComponent->UninitializeAbilitySystem();
-	//	}
-	//}
+		if (UPDPawnExtensionComponent* OtherExtensionComponent = FindPawnExtensionComponent(ExistingAvatar))
+		{
+			OtherExtensionComponent->UninitializeAbilitySystem();
+		}
+	}
 
-	//AbilitySystemComponent = InASC;
-	//AbilitySystemComponent->InitAbilityActorInfo(InOwnerActor, Pawn);
+	AbilitySystemComponent = InASC;
+	AbilitySystemComponent->InitAbilityActorInfo(InOwnerActor, Pawn);
 
-	//if (ensure(PawnData))
-	//{
-	//	//InASC->SetTagRelationshipMapping(PawnData->TagRelationshipMapping);
-	//}
+	if (PawnData)
+	{
+		InASC->SetTagRelationshipMapping(PawnData->TagRelationshipMapping);
+	}
 
 	OnAbilitySystemInitialized.Broadcast();
 }
@@ -231,35 +233,53 @@ void UPDPawnExtensionComponent::SetupPlayerInputComponent()
 
 void UPDPawnExtensionComponent::UninitializeAbilitySystem()
 {
-	//if (!AbilitySystemComponent)
-	//{
-	//	return;
-	//}
+	if (!AbilitySystemComponent)
+	{
+		return;
+	}
 
-	//// Uninitialize the ASC if we're still the avatar actor (otherwise another pawn already did it when they became the avatar actor)
-	//if (AbilitySystemComponent->GetAvatarActor() == GetOwner())
-	//{
-	//	FGameplayTagContainer AbilityTypesToIgnore;
-	//	AbilityTypesToIgnore.AddTag(PDGameplayTags::Ability_Behavior_SurvivesDeath);
-	//
-	//	AbilitySystemComponent->CancelAbilities(nullptr, &AbilityTypesToIgnore);
-	//	AbilitySystemComponent->ClearAbilityInput();
-	//	AbilitySystemComponent->RemoveAllGameplayCues();
+	// Uninitialize the ASC if we're still the avatar actor (otherwise another pawn already did it when they became the avatar actor)
+	if (AbilitySystemComponent->GetAvatarActor() == GetOwner())
+	{
+		FGameplayTagContainer AbilityTypesToIgnore;
+		AbilityTypesToIgnore.AddTag(PDGameplayTags::Ability_Behavior_SurvivesDeath);
+	
+		AbilitySystemComponent->CancelAbilities(nullptr, &AbilityTypesToIgnore);
+		AbilitySystemComponent->ClearAbilityInput();
+		AbilitySystemComponent->RemoveAllGameplayCues();
 
-	//	if (AbilitySystemComponent->GetOwnerActor() != nullptr)
-	//	{
-	//		AbilitySystemComponent->SetAvatarActor(nullptr);
-	//	}
-	//	else
-	//	{
-	//		// If the ASC doesn't have a valid owner, we need to clear *all* actor info, not just the avatar pairing
-	//		AbilitySystemComponent->ClearActorInfo();
-	//	}
+		if (AbilitySystemComponent->GetOwnerActor() != nullptr)
+		{
+			AbilitySystemComponent->SetAvatarActor(nullptr);
+		}
+		else
+		{
+			// If the ASC doesn't have a valid owner, we need to clear *all* actor info, not just the avatar pairing
+			AbilitySystemComponent->ClearActorInfo();
+		}
 
-	//	OnAbilitySystemUninitialized.Broadcast();
-	//}
+		OnAbilitySystemUninitialized.Broadcast();
+	}
 
-	//AbilitySystemComponent = nullptr;
+	AbilitySystemComponent = nullptr;
+}
+
+void UPDPawnExtensionComponent::HandleControllerChanged()
+{
+	if (AbilitySystemComponent && (AbilitySystemComponent->GetAvatarActor() == GetPawnChecked<APawn>()))
+	{
+		ensure(AbilitySystemComponent->AbilityActorInfo->OwnerActor == AbilitySystemComponent->GetOwnerActor());
+		if (AbilitySystemComponent->GetOwnerActor() == nullptr)
+		{
+			UninitializeAbilitySystem();
+		}
+		else
+		{
+			AbilitySystemComponent->RefreshAbilityActorInfo();
+		}
+	}
+
+	CheckDefaultInitialization();
 }
 
 void UPDPawnExtensionComponent::OnAbilitySystemInitialized_RegisterAndCall(FSimpleMulticastDelegate::FDelegate Delegate)
@@ -269,10 +289,10 @@ void UPDPawnExtensionComponent::OnAbilitySystemInitialized_RegisterAndCall(FSimp
 		OnAbilitySystemInitialized.Add(Delegate);
 	}
 
-	//if (AbilitySystemComponent)
-	//{
-	//	Delegate.Execute();
-	//}
+	if (AbilitySystemComponent)
+	{
+		Delegate.Execute();
+	}
 }
 
 void UPDPawnExtensionComponent::OnAbilitySystemUninitialized_Register(FSimpleMulticastDelegate::FDelegate Delegate)

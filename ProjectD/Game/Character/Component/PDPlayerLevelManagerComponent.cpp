@@ -8,7 +8,7 @@ UPDPlayerLevelManagerComponent::UPDPlayerLevelManagerComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 	
-	_ExperienceData = MakeUnique<FExperiencePoint>(0);
+	//_ExperienceData = MakeUnique<FExperiencePoint>(0);
 	//_ExperienceData.Get()->LevelUpDelegate.BindUObject(this,ThisClass::LevelUp());
 	
 	
@@ -17,13 +17,13 @@ UPDPlayerLevelManagerComponent::UPDPlayerLevelManagerComponent()
 
 float UPDPlayerLevelManagerComponent::GetExprNormalized() const
 {
-	if (_ExperienceData.Get())
-	{
-		const float Health = _ExperienceData.Get()->GetValue();
-		const float MaxHealth = _ExperienceData.Get()->GetMaxValue();
+	//if (_ExperienceData.Get())
+	//{
+	//	const float Health = _ExperienceData.Get()->GetValue();
+	//	const float MaxHealth = _ExperienceData.Get()->GetMaxValue();
 
-		return ((MaxHealth > 0.0f) ? (Health / MaxHealth) : 0.0f);
-	}
+	//	return ((MaxHealth > 0.0f) ? (Health / MaxHealth) : 0.0f);
+	//}
 
 	return 0.0f;
 }
@@ -41,31 +41,31 @@ void UPDPlayerLevelManagerComponent::BeginPlay()
 
 const float UPDPlayerLevelManagerComponent::GetMaxExp() const
 {
-	return _ExperienceData.Get()->GetValue();
+	return 0.0f;
 }
 
 const float UPDPlayerLevelManagerComponent::GetExp() const
 {
-	return _ExperienceData.Get()->GetMaxValue();
+	return 0.0f;
 }
 
 void UPDPlayerLevelManagerComponent::AddExperience(const float amount)
 {
-	if (true == _ExperienceData.Get()->AddExpr(amount))
-	{		
-		OnExprChanged.Broadcast(0.0f);
-		LevelUp();
-	}
-	else
-	{
-		OnExprChanged.Broadcast(amount);
-	}
+	//if (true == _ExperienceData.Get()->AddExpr(amount))
+	//{		
+	//	OnExprChanged.Broadcast(0.0f);
+	//	LevelUp();
+	//}
+	//else
+	//{
+	//	OnExprChanged.Broadcast(amount);
+	//}
 
 }
 
 void UPDPlayerLevelManagerComponent::SetMaxExpr(const float amount)
 {
-	_ExperienceData.Get()->SetMax(amount);
+	//_ExperienceData.Get()->SetMax(amount);
 }
 
 void UPDPlayerLevelManagerComponent::LevelUp()
@@ -76,7 +76,7 @@ void UPDPlayerLevelManagerComponent::LevelUp()
 
 	OnLeveledUp.Broadcast();
 
-	OnExprChanged.Broadcast(_ExperienceData.Get()->GetValue());
+	//OnExprChanged.Broadcast(_ExperienceData.Get()->GetValue());
 }
 
 // Called every frame

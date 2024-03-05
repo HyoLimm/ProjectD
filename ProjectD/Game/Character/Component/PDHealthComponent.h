@@ -21,9 +21,8 @@ enum class EPDDeathState : uint8
 	DeathFinished
 };
 
-
-struct FHealthPoint;
-
+class UPDHealthSet;
+class UPDAbilitySystemComponent;
 
 UCLASS()
 class PROJECTD_API UPDHealthComponent : public UGameFrameworkComponent
@@ -33,21 +32,11 @@ class PROJECTD_API UPDHealthComponent : public UGameFrameworkComponent
 public:
 	UPDHealthComponent(const FObjectInitializer& ObjectInitializer);
 
-	// Returns the health component if one exists on the specified actor.
 	UFUNCTION(BlueprintPure, Category = "PD|Health")
 	static UPDHealthComponent* FindHealthComponent(const AActor* Actor) { return (Actor ? Actor->FindComponentByClass<UPDHealthComponent>() : nullptr); }
 
-
-	UPROPERTY(BlueprintAssignable)
-	FPDHealth_DeathEvent _OnDeathStarted;
-
-	UPROPERTY(BlueprintAssignable)
-	FPDHealth_DeathEvent _OnDeathFinished;
-
-
-	// Initialize the component using an ability system component.
 	UFUNCTION(BlueprintCallable, Category = "PD|Health")
-	void InitializeWithAbilitySystem();
+	void InitializeWithAbilitySystem(UPDAbilitySystemComponent* InASC);
 
 	// Uninitialize the component, clearing any references to the ability system.
 	UFUNCTION(BlueprintCallable, Category = "PD|Health")
@@ -78,24 +67,35 @@ public:
 
 
 public:
-	// Delegate fired when the health value has changed.
 	UPROPERTY(BlueprintAssignable)
 	FPDHealth_AttributeChanged OnHealthChanged;
 
-	// Delegate fired when the max health value has changed.
 	UPROPERTY(BlueprintAssignable)
 	FPDHealth_AttributeChanged OnMaxHealthChanged;
+
+
+	UPROPERTY(BlueprintAssignable)
+	FPDHealth_DeathEvent OnDeathStarted;
+
+	UPROPERTY(BlueprintAssignable)
+	FPDHealth_DeathEvent OnDeathFinished;
 protected:
 	virtual void OnUnregister() override;
 
 	void ClearGameplayTags();
 
-	/*virtual void HandleHealthChanged(const FOnAttributeChangeData& ChangeData);
-	virtual void HandleMaxHealthChanged(const FOnAttributeChangeData& ChangeData);
-	virtual void HandleOutOfHealth(AActor* DamageInstigator, AActor* DamageCauser, const FGameplayEffectSpec& DamageEffectSpec, float DamageMagnitude);*/
+	virtual void HandleHealthChanged(AActor* DamageInstigator, AActor* DamageCauser, const FGameplayEffectSpec* DamageEffectSpec, float DamageMagnitude, float OldValue, float NewValue);
+	virtual void HandleMaxHealthChanged(AActor* DamageInstigator, AActor* DamageCauser, const FGameplayEffectSpec* DamageEffectSpec, float DamageMagnitude, float OldValue, float NewValue);
+	virtual void HandleOutOfHealth(AActor* DamageInstigator, AActor* DamageCauser, const FGameplayEffectSpec* DamageEffectSpec, float DamageMagnitude, float OldValue, float NewValue);
 
 protected:	
-	TUniquePtr<FHealthPoint> _HealthData;
+	
+	
+	UPROPERTY()
+	TObjectPtr<UPDAbilitySystemComponent> _AbilitySystemComponent;
+
+	UPROPERTY()
+	TObjectPtr<const UPDHealthSet> _HealthSet;
 	
 	UPROPERTY()
 	EPDDeathState _DeathState;

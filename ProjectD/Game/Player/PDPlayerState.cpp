@@ -2,24 +2,40 @@
 
 
 #include "Game/Player/PDPlayerState.h"
-#include "Game/GameModes/PDExperienceManagerComponent.h"
-#include "Game/GameModes/PDGameMode.h"
-
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
 #include "Components/GameFrameworkComponentManager.h"
-#include "Game/AbilitySystem/PDAbilitySet.h"
 
+#include "Game/GameModes/PDExperienceManagerComponent.h"
+#include "Game/GameModes/PDGameMode.h"
+#include "Game/AbilitySystem/PDAbilitySet.h"
+#include "Game/AbilitySystem/Attributes/PDHealthSet.h"
+#include "Game/AbilitySystem/Attributes/PDCombatSet.h"
+#include "Game/AbilitySystem/Attributes/PDExperienceSet.h"
+#include "Game/AbilitySystem/PDAbilitySystemComponent.h"
+#include "Game/Character/PDPawnData.h"
+#include "Game/PDLogChannels.h"
 const FName APDPlayerState::NAME_PDAbilityReady("PDAbilitiesReady");
 
 
 APDPlayerState::APDPlayerState(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer)
 {	
+
+	AbilitySystemComponent = ObjectInitializer.CreateDefaultSubobject<UPDAbilitySystemComponent>(this, TEXT("AbilitySystemComponent"));
+
+	HealthSet = CreateDefaultSubobject<UPDHealthSet>(TEXT("HealthSet"));
+	CombatSet = CreateDefaultSubobject<UPDCombatSet>(TEXT("CombatSet"));
+	ExpSet = CreateDefaultSubobject<UPDExperienceSet>(TEXT("ExpSet"));
 }
 
 
 
+
+UAbilitySystemComponent* APDPlayerState::GetAbilitySystemComponent() const
+{
+	return GetPDAbilitySystemComponent();
+}
 
 void APDPlayerState::PreInitializeComponents()
 {
@@ -30,6 +46,10 @@ void APDPlayerState::PreInitializeComponents()
 void APDPlayerState::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
+
+	check(AbilitySystemComponent);
+	AbilitySystemComponent->InitAbilityActorInfo(this, GetPawn());
+
 
 	UWorld* World = GetWorld();
 	if (World && World->IsGameWorld())
@@ -65,12 +85,22 @@ void APDPlayerState::SetPawnData(const UPDPawnData* InPawnData)
 
 	if (PawnData)
 	{
-		//UE_LOG(LogPD, Error, TEXT("Trying to set PawnData [%s] on player state [%s] that already has valid PawnData [%s]."), *GetNameSafe(InPawnData), *GetNameSafe(this), *GetNameSafe(PawnData));
+		UE_LOG(LogPD, Error, TEXT("Trying to set PawnData [%s] on player state [%s] that already has valid PawnData [%s]."), *GetNameSafe(InPawnData), *GetNameSafe(this), *GetNameSafe(PawnData));
 		return;
 	}
 
 	//MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, PawnData, this);
 	PawnData = InPawnData;
+
+
+	for (const UPDAbilitySet* AbilitySet : PawnData->AbilitySets)
+	{
+		if (AbilitySet)
+		{
+			AbilitySet->GiveToAbilitySystem(AbilitySystemComponent, nullptr);
+		}
+	}
+
 
 
 	UGameFrameworkComponentManager::SendGameFrameworkComponentExtensionEvent(this, NAME_PDAbilityReady);

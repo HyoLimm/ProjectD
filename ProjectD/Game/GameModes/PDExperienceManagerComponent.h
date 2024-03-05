@@ -5,6 +5,12 @@
 #include "CoreMinimal.h"
 #include "Components/GameStateComponent.h"
 #include "PDExperienceManagerComponent.generated.h"
+
+
+
+namespace UE::GameFeatures { struct FResult; }
+
+
 class UPDExperienceDefinition;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnPDExperienceLoaded, const UPDExperienceDefinition* /*Experience*/);
@@ -32,10 +38,21 @@ class PROJECTD_API UPDExperienceManagerComponent : public UGameStateComponent
 public:
 	UPDExperienceManagerComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+
+	//~UActorComponent interface
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	//~End of UActorComponent interface
+
+
+
+	void CallOrRegister_OnExperienceLoaded_HighPriority(FOnPDExperienceLoaded::FDelegate&& Delegate);
+
 	// Ensures the delegate is called once the experience has been loaded
 	// If the experience has already loaded, calls the delegate immediately
-	// 경험이 로드된 후 delegate를 호출하는지 확인합니다. 경험이 이미 로드된 경우 delegate를 즉시 호출합니다
 	void CallOrRegister_OnExperienceLoaded(FOnPDExperienceLoaded::FDelegate&& Delegate);
+
+
+	void CallOrRegister_OnExperienceLoaded_LowPriority(FOnPDExperienceLoaded::FDelegate&& Delegate);
 
 	// Tries to set the current experience, either a UI or gameplay one
 	// UI 또는 게임 플레이 중 하나의 현재 경험을 설정하려고 합니다
@@ -58,18 +75,30 @@ private:
 
 	EPDExperienceLoadState _LoadState = EPDExperienceLoadState::Unloaded;
 
+	/**
+	 * Delegate called when the experience has finished loading just before others
+	 * (e.g., subsystems that set up for regular gameplay)
+	 */
+	FOnPDExperienceLoaded OnExperienceLoaded_HighPriority;
+
 	/** Delegate called when the experience has finished loading */
 	FOnPDExperienceLoaded OnExperienceLoaded;
+
+	/** Delegate called when the experience has finished loading */
+	FOnPDExperienceLoaded OnExperienceLoaded_LowPriority;
 
 private:
 	void StartExperienceLoad();
 	void OnExperienceLoadComplete();
-	//void OnGameFeaturePluginLoadComplete(const UE::GameFeatures::FResult& Result);
+	void OnGameFeaturePluginLoadComplete(const UE::GameFeatures::FResult& Result);
 	void OnExperienceFullLoadCompleted();
 
 	void OnActionDeactivationCompleted();
 	void OnAllActionsDeactivated();
 
+
+	int32 NumObservedPausers = 0;
+	int32 NumExpectedPausers = 0;
 
 	int32 NumGameFeaturePluginsLoading = 0;
 

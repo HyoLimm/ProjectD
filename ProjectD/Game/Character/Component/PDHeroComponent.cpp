@@ -26,6 +26,8 @@
 
 #include <GameFramework/Pawn.h>
 #include "UserSettings/EnhancedInputUserSettings.h"
+#include "Game/GameFeatures/GameFeatureAction_AddInputContextMapping.h"
+#include "InputMappingContext.h"
 #include UE_INLINE_GENERATED_CPP_BY_NAME(PDHeroComponent)
 
 
@@ -38,7 +40,25 @@ const FName UPDHeroComponent::NAME_ActorFeatureName("Hero");
 UPDHeroComponent::UPDHeroComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	bReadyToBindInputs = false;
+	_bReadyToBindInputs = false;
+}
+
+void UPDHeroComponent::SetAbilityCameraMode(TSubclassOf<UPDCameraMode> CameraMode, const FGameplayAbilitySpecHandle& OwningSpecHandle)
+{
+	if (CameraMode)
+	{
+		_AbilityCameraMode = CameraMode;
+		AbilityCameraModeOwningSpecHandle = OwningSpecHandle;
+	}
+}
+
+void UPDHeroComponent::ClearAbilityCameraMode(const FGameplayAbilitySpecHandle& OwningSpecHandle)
+{
+	if (AbilityCameraModeOwningSpecHandle == OwningSpecHandle)
+	{
+		_AbilityCameraMode = nullptr;
+		AbilityCameraModeOwningSpecHandle = FGameplayAbilitySpecHandle();
+	}
 }
 
 void UPDHeroComponent::OnRegister()
@@ -81,8 +101,7 @@ void UPDHeroComponent::BeginPlay()
 	const FGameplayTag EmptyTag = FGameplayTag();
 	BindOnActorInitStateChanged(UPDPawnExtensionComponent::NAME_ActorFeatureName, EmptyTag, bCallIfReached);
 
-	// Notifies that we are done spawning, then try the rest of initialization
-	// 스폰이 완료되었음을 알리고 
+	// 스폰이 완료되었음을 알리고  나머지 초기화 진행
 	ensure(TryToChangeInitState(PDGameplayTags::InitState_Spawned));
 
 	//나머지 초기화를 시도합니다
@@ -97,13 +116,11 @@ void UPDHeroComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 bool UPDHeroComponent::CanChangeInitState(UGameFrameworkComponentManager* Manager, FGameplayTag CurrentState, FGameplayTag DesiredState) const
 {
 	check(Manager);
-
 	APawn* Pawn = GetPawn<APawn>();
 
 	if (!CurrentState.IsValid() && DesiredState == PDGameplayTags::InitState_Spawned)
 	{
-		// As long as we have a real pawn, let us transition
-		// 진짜 폰이 있는한, 전환한다.
+		// 진짜 폰이 이미 있으면 리턴
 		if (Pawn)
 		{
 			return true;
@@ -111,8 +128,8 @@ bool UPDHeroComponent::CanChangeInitState(UGameFrameworkComponentManager* Manage
 	}
 	else if (CurrentState == PDGameplayTags::InitState_Spawned && DesiredState == PDGameplayTags::InitState_DataAvailable)
 	{
-		// 플레이어 스테이트는 필수다.
-		if (!GetPlayerState<APDPlayerState>())
+		// 플레이어 스테이트는 필수.
+		if (false == GetPlayerState<APDPlayerState>())
 		{
 			return false;
 		}
@@ -174,40 +191,39 @@ void UPDHeroComponent::HandleChangeInitState(UGameFrameworkComponentManager* Man
 	{
 		APawn* Pawn = GetPawn<APawn>();
 		APDPlayerState* PDPlayerState = GetPlayerState<APDPlayerState>();
-		if (!ensure(Pawn && PDPlayerState))
+		if (Pawn && PDPlayerState)
 		{
-			return;
-		}
-
-		const bool bIsLocallyControlled = Pawn->IsLocallyControlled();
-		const UPDPawnData* PawnData = nullptr;
-
-		if (UPDPawnExtensionComponent* PawnExtComp = UPDPawnExtensionComponent::FindPawnExtensionComponent(Pawn))
-		{
-			PawnData = PawnExtComp->GetPawnData<UPDPawnData>();
-
-			// The player state holds the persistent data for this player (state that persists across deaths and multiple pawns).
-			// 플레이어 상태가 이 플레이어의 영구 데이터를 보유하고 있습니다
-			// The ability system component and attribute sets live on the player state.
-			//  ability system component 및 attribute sets는 player state에 따라 라이브로 제공됩니다.
-			//PawnExtComp->InitializeAbilitySystem(PDPlayerState->GetPDAbilitySystemComponent(), PDPlayerState);
-		}
-
-		if (APDPlayerController* PDPC = GetController<APDPlayerController>())
-		{
-			if (Pawn->InputComponent != nullptr)
+			const UPDPawnData* PawnData = nullptr;			
+			if (UPDPawnExtensionComponent* PawnExtComp = UPDPawnExtensionComponent::FindPawnExtensionComponent(Pawn))
 			{
-				InitializePlayerInput(Pawn->InputComponent);
-			}
-		}
+				PawnData = PawnExtComp->GetPawnData<UPDPawnData>();
+				check(PawnData);
 
-		if (bIsLocallyControlled && PawnData)
-		{
-			if (UPDCameraComponent* CameraComponent = UPDCameraComponent::FindCameraComponent(Pawn))
-			{
-				CameraComponent->DetermineCameraModeDelegate.BindUObject(this, &ThisClass::DetermineCameraMode);
+				//  Player State는 이 플레이어의 영구 데이터(사망자 및 여러 폰에 걸쳐 지속되는 상태)를 보유합니다.
+				//  ability system component 및 attribute sets는 player state에 따라 라이브로 제공됩니다.
+				PawnExtComp->InitializeAbilitySystem(PDPlayerState->GetPDAbilitySystemComponent(), PDPlayerState);
 			}
-		}
+
+
+			// InputComponent 초기화
+			if (APDPlayerController* PDPC = GetController<APDPlayerController>())
+			{
+				if (Pawn->InputComponent != nullptr)
+				{
+					InitializePlayerInput(Pawn->InputComponent);
+				}
+			}
+
+			const bool bIsLocallyControlled = Pawn->IsLocallyControlled();
+			///카메라 변화감지
+			if (bIsLocallyControlled && PawnData)
+			{
+				if (UPDCameraComponent* CameraComponent = UPDCameraComponent::FindCameraComponent(Pawn))
+				{
+					CameraComponent->DetermineCameraModeDelegate.BindUObject(this, &ThisClass::DetermineCameraMode);
+				}
+			}
+		}		
 	}
 }
 
@@ -236,8 +252,7 @@ void UPDHeroComponent::CheckDefaultInitialization()
 
 void UPDHeroComponent::AddAdditionalInputConfig(const UPDInputConfig* InputConfig)
 {
-	TArray<uint32> BindHandles;
-
+	//외부에서 inputconfig 추가할 경우 지금은 UGameFeatureAction_AddInputBinding 에서 호출함
 	const APawn* Pawn = GetPawn<APawn>();
 	if (!Pawn)
 	{
@@ -247,17 +262,19 @@ void UPDHeroComponent::AddAdditionalInputConfig(const UPDInputConfig* InputConfi
 	const APlayerController* PC = GetController<APlayerController>();
 	check(PC);
 
-	const ULocalPlayer* LP = PC->GetLocalPlayer();
-	check(LP);
+	const ULocalPlayer* LocalPlayer = PC->GetLocalPlayer();
+	check(LocalPlayer);
 
-	UEnhancedInputLocalPlayerSubsystem* Subsystem = LP->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 	check(Subsystem);
 
 	if (const UPDPawnExtensionComponent* PawnExtComp = UPDPawnExtensionComponent::FindPawnExtensionComponent(Pawn))
 	{
 		UPDInputComponent* PDIC = Pawn->FindComponentByClass<UPDInputComponent>();
+		//예기치 않은 Input Component 클래스입니다! Gameplay Abilities 은 입력에 구속되지 않습니다.	input component를 UPDInputComponent 또는 그 하위 클래스로 변경합니다.
 		if (ensureMsgf(PDIC, TEXT("Unexpected Input Component class! The Gameplay Abilities will not be bound to their inputs. Change the input component to UPDInputComponent or a subclass of it.")))
 		{
+			TArray<uint32> BindHandles;
 			PDIC->BindAbilityActions(InputConfig, this, &ThisClass::Input_AbilityInputTagPressed, &ThisClass::Input_AbilityInputTagReleased, /*out*/ BindHandles);
 		}
 	}
@@ -265,12 +282,12 @@ void UPDHeroComponent::AddAdditionalInputConfig(const UPDInputConfig* InputConfi
 
 void UPDHeroComponent::RemoveAdditionalInputConfig(const UPDInputConfig* InputConfig)
 {
-
+	//구현해야함
 }
 
 bool UPDHeroComponent::IsReadyToBindInputs() const
 {
-	return bReadyToBindInputs;
+	return _bReadyToBindInputs;
 }
 
 void UPDHeroComponent::InitializePlayerInput(UInputComponent* PlayerInputComponent)
@@ -304,8 +321,9 @@ void UPDHeroComponent::InitializePlayerInput(UInputComponent* PlayerInputCompone
 			if (const UPDInputConfig* InputConfig = PawnData->InputConfig)
 			{
 
-				for (const FInputMappingContextAndPriority& Mapping : _DefaultInputMappings)
-				{
+				//1. 멤버변수 매핑추가
+				for (const FInputMappingContextAndPriority Mapping : _DefaultInputMappings)
+				{					
 					if (UInputMappingContext* IMC = Mapping.InputMapping.Get())
 					{
 						if (Mapping.bRegisterWithSettings)
@@ -317,15 +335,21 @@ void UPDHeroComponent::InitializePlayerInput(UInputComponent* PlayerInputCompone
 
 							FModifyContextOptions Options = {};
 							Options.bIgnoreAllPressedKeysUntilRelease = false;
-							// Actually add the config to the local player							
+							// 실제로 로컬 플레이어에 config 추가					
 							Subsystem->AddMappingContext(IMC, Mapping.Priority, Options);
 						}
 					}
 				}
 
+				//2. 파라미터 입력컴포넌트 바인딩
 				if (UPDInputComponent* PDInputComponent = Cast<UPDInputComponent>(PlayerInputComponent))
 				{
+					//플레이어가 설정했을 수 있는 키 매핑을 추가합니다
 					PDInputComponent->AddInputMappings(InputConfig, Subsystem);
+
+					TArray<uint32> BindHandles;
+					PDInputComponent->BindAbilityActions(InputConfig, this, &ThisClass::Input_AbilityInputTagPressed, &ThisClass::Input_AbilityInputTagReleased, /*out*/ BindHandles);
+
 
 					PDInputComponent->BindNativeAction(InputConfig, PDGameplayTags::InputTag_Move, ETriggerEvent::Triggered, this, &ThisClass::Input_Move, /*bLogIfNotFound=*/ false);
 					PDInputComponent->BindNativeAction(InputConfig, PDGameplayTags::InputTag_Look_Mouse, ETriggerEvent::Triggered, this, &ThisClass::Input_LookMouse, /*bLogIfNotFound=*/ false);
@@ -334,9 +358,9 @@ void UPDHeroComponent::InitializePlayerInput(UInputComponent* PlayerInputCompone
 		}
 	}
 
-	if (ensure(!bReadyToBindInputs))
+	if (ensure(!_bReadyToBindInputs))
 	{
-		bReadyToBindInputs = true;
+		_bReadyToBindInputs = true;
 	}
 
 	UGameFrameworkComponentManager::SendGameFrameworkComponentExtensionEvent(const_cast<APlayerController*>(PC), NAME_BindInputsNow);
@@ -347,6 +371,12 @@ void UPDHeroComponent::InitializePlayerInput(UInputComponent* PlayerInputCompone
 
 TSubclassOf<UPDCameraMode> UPDHeroComponent::DetermineCameraMode() const
 {
+	if (_AbilityCameraMode)
+	{
+		return _AbilityCameraMode;
+	}
+
+
 	const APawn* Pawn = GetPawn<APawn>();
 	if (!Pawn)
 	{
@@ -412,11 +442,30 @@ void UPDHeroComponent::Input_LookMouse(const FInputActionValue& InputActionValue
 
 void UPDHeroComponent::Input_AbilityInputTagPressed(FGameplayTag InputTag)
 {
-
+	if (const APawn* Pawn = GetPawn<APawn>())
+	{
+		if (const UPDPawnExtensionComponent* PawnExtComp = UPDPawnExtensionComponent::FindPawnExtensionComponent(Pawn))
+		{
+			if (UPDAbilitySystemComponent* PDASC = PawnExtComp->GetPDAbilitySystemComponent())
+			{
+				PDASC->AbilityInputTagPressed(InputTag);
+			}
+		}
+	}
 }
 
 void UPDHeroComponent::Input_AbilityInputTagReleased(FGameplayTag InputTag)
 {
 
+	if (const APawn* Pawn = GetPawn<APawn>())
+	{
+		if (const UPDPawnExtensionComponent* PawnExtComp = UPDPawnExtensionComponent::FindPawnExtensionComponent(Pawn))
+		{
+			if (UPDAbilitySystemComponent* PDASC = PawnExtComp->GetPDAbilitySystemComponent())
+			{
+				PDASC->AbilityInputTagReleased(InputTag);
+			}
+		}
+	}
 }
 

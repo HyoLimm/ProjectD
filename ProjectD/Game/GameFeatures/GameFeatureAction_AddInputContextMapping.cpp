@@ -88,23 +88,21 @@ void UGameFeatureAction_AddInputContextMapping::RegisterInputContextMappingsForG
 void UGameFeatureAction_AddInputContextMapping::RegisterInputMappingContextsForLocalPlayer(ULocalPlayer* LocalPlayer)
 {
 	if (ensure(LocalPlayer))
-	{
-		UPDAssetManager& AssetManager = UPDAssetManager::Get();
-		
+	{		
 		if (UEnhancedInputLocalPlayerSubsystem* EISubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer))
 		{
 			if (UEnhancedInputUserSettings* Settings = EISubsystem->GetUserSettings())
 			{
 				for (const FInputMappingContextAndPriority& Entry : InputMappings)
 				{
-					// Skip entries that don't want to be registered
+					// 등록하지 않을 항목 건너뛰기
 					if (!Entry.bRegisterWithSettings)
 					{
 						continue;
 					}
 
-					// Register this IMC with the settings!
-					if (UInputMappingContext* IMC = AssetManager.GetAsset(Entry.InputMapping))
+					// 설정에 이 IMC를 등록합니다!
+					if (UInputMappingContext* IMC = UPDAssetManager::Get().GetAsset(Entry.InputMapping))
 					{
 						Settings->RegisterInputMappingContext(IMC);
 					}

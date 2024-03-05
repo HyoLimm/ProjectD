@@ -2,8 +2,9 @@
 
 
 #include "Game/Settings/PDGameSettingRegistry.h"
-#include "Game/Player/PDLocalPlayer.h"
+#include "GameSettingCollection.h"
 
+#include "Game/Player/PDLocalPlayer.h"
 UPDGameSettingRegistry::UPDGameSettingRegistry()
 {
 
@@ -28,7 +29,10 @@ void UPDGameSettingRegistry::SaveChanges()
 
 void UPDGameSettingRegistry::OnInitialize(ULocalPlayer* InLocalPlayer)
 {
+	UPDLocalPlayer* PDLocalPlayer = Cast<UPDLocalPlayer>(InLocalPlayer);
 
+	GameplaySettings = InitializeGameplaySettings(PDLocalPlayer);
+	RegisterSetting(GameplaySettings);
 }
 
 bool UPDGameSettingRegistry::IsFinishedInitializing() const

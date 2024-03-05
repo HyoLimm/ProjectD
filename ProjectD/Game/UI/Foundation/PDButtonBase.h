@@ -9,8 +9,8 @@
 /**
  * 
  */
-UCLASS()
-class PROJECTD_API UPDButtonBase : public UCommonButtonBase
+UCLASS(Abstract, BlueprintType, Blueprintable)
+class UPDButtonBase : public UCommonButtonBase
 {
 	GENERATED_BODY()
 

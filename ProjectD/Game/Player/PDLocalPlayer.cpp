@@ -3,6 +3,7 @@
 
 #include "Game/Player/PDLocalPlayer.h"
 #include "Game/Settings/PDSettingsLocal.h"
+#include "Game/Settings/PDSettingsShared.h"
 
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(PDLocalPlayer)
